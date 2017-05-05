@@ -1,0 +1,18 @@
+-Read DAT files
+-Read main IMG
+
+-Cache IDEs from DATs (ItemDefinitionCollection)
+-Cache IPLs from DATs (PlacementCollection)
+-Cache streaming IPL from IMGs  (PlacementCollection)(GTA SA)
+	-Resolve LODs  (PlacementCollection)(GTA SA)
+
+-Cache TXDs from DATs and IMGs  (PlacementCollection)
+-Cache DFFs from DATs and IMGs (PlacementCollection)
+
+-Resolve texture parents  (TextureCollection)
+
+-Place Items (Loader)
+    -Get Object (Item Definition) //Necessary DFFs and TXDs will be loaded, the unused won't
+		-Load DFF
+		-Load TXD
+        -Get Object LOD

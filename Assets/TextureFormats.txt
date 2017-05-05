@@ -1,0 +1,34 @@
+16bpp 5 bits RGB, 1 bit alpha.
+Format_1555 = 0x0100
+
+16bpp 5 bits R, 6 bits G, 5 bits B.
+Format_565 = 0x0200
+
+16bpp 4 bits RGBA.
+Format_4444 = 0x0300
+
+8bpp 8 bits alpha.
+Format_LUM8 = 0x0400
+
+32bpp 8 bits BGRA.
+Format_8888 = 0x0500
+
+24bpp 8 bits BGR, no alpha.
+Format_888 = 0x0600
+
+15bpp 5 bits RGB.
+Format_555 = 0x0A00
+
+DXT1
+ - RGB565
+ - RGBA1555 (Stored as RBG565)
+ 
+DXT3
+ - RGBA4444 (Stored as RBG565)
+ 
+Color block
+ - BGR888
+ - BGRA8888
+ 
+Palette
+ - RGBA8888 Extension_Palette8

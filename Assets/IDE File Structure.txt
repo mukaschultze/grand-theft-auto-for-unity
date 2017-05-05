@@ -1,0 +1,40 @@
+http://gta.wikia.com/wiki/IDE
+http://www.gtamodding.com/wiki/Item_Definition
+
+OBJS 
+	ID, ModelName, TextureName, ObjectCount (optional), DrawDist, [DrawDist2, ...], Flags
+
+TOBJ
+	ID, ModelName, TextureName, ObjectCount (optional), DrawDist, [DrawDist2, ...], Flags, TimeOn, TimeOff
+
+ANIM (GTA SA only)
+	ID, ModelName, TextureName, AnimName, DrawDist, Flags
+
+PEDS
+	ID, ModelName, TxdName, Threat, Behavior, AnimationType, VehClass (GTA 3)
+	ID, ModelName, TxdName, Threat, Behavior, AnimationType, VehClass, StartAnimation?, Radio1, Radio2 (GTA VC)
+	
+WEAP
+	ID, ModelName, TextureName, Animation, ?, DrawDistance, ?
+
+CARS
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Class, Frequency, Level, Comprules, WheelID, WheelScale (GTA 3 CAR)
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Class, Frequency, Level, Comprules (GTA 3 BOAT AND TRAIN)
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Class, Frequency, Level, Comprules, LODModel (GTA 3 PLANE)
+	
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Anims, Class, Frequency, Level, Comprules, WheelID, WheelScale (GTA VC CAR)
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Anims, Class, Frequency, Level, Comprules, Unknown, WheelScale (GTA VC BIKE)
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Anims, Class, Frequency, Level, Comprules (GTA VC BOAT AND HELI)
+	ID, ModelName, TxdName, Type, HandlingID, GameName, Anims, Class, Frequency, Level, Comprules, LODModel (GTA VC PLANE)
+	
+HIER
+	Unknown
+	
+TXDP
+	TextureName, TextureParentName
+	
+2DFX
+	ID, X, Y, Z, R, G, B, unknown (0 or 200), 1, Corona, Shadow, Distance, Outer range, Size, Inner range, IDE flag, Wet, Flare, Dust (LIGHTS)
+	ID, X, Y, Z, R, G, B, unknown (63 or 200), 2, Particle, unk1, unk2, unk3, Size (PARTICLE)
+	ID, X, Y, Z, R, G, B, unknown (200), 3, Behavior, unk1, unk2, unk3, RotX, RotY, RotZ (GTA VC PEDS)
+	ID, X, Y, Z, R, G, B, unknown (120), 4 (GTA VC SUN REFLECTIONS)

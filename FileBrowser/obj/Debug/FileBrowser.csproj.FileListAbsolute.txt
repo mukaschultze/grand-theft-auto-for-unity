@@ -1,0 +1,3 @@
+C:\Users\samue\Desktop\Unity Projects\Grand Theft Auto\Assets\StreamingAssets\FileBrowser.exe.config
+C:\Users\samue\Desktop\Unity Projects\Grand Theft Auto\Assets\StreamingAssets\FileBrowser.exe
+C:\Users\samue\Desktop\Unity Projects\Grand Theft Auto\FileBrowser\obj\Debug\FileBrowser.exe

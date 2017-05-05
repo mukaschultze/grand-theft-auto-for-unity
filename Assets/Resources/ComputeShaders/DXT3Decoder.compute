@@ -1,0 +1,89 @@
+﻿#pragma kernel Decode
+
+struct Chunk {
+    uint alpha1;
+    uint alpha2;
+    uint code;
+    uint indices;
+};
+
+int Width;
+int Height;
+RWTexture2D<float4> Result;
+StructuredBuffer<Chunk> Chunks;
+
+[numthreads(8,8,1)]
+void Decode (uint3 id : SV_DispatchThreadID){
+    Chunk chunk = Chunks[id.y * Width / 4 + id.x];
+
+    uint code = chunk.code;
+    uint indices = chunk.indices;
+
+    uint r = 0;
+    uint g = 0;
+    uint b = 0;
+    uint a = chunk.alpha1;
+
+    float4 c0 = float4(0, 0, 0, 255);
+    float4 c1 = float4(0, 0, 0, 255);
+    float4 c2 = float4(0, 0, 0, 255);
+    float4 c3 = float4(0, 0, 0, 255);
+    float4 black = float4(0, 0, 0, 255);
+
+    b = (code & 0x1F);              //0000 0000 0000 0000 0000 0000 0001 1111  
+    g = (code & 0x7E0) >> 5;        //0000 0000 0000 0000 0000 0111 1110 0000
+    r = (code & 0xF800) >> 11;      //0000 0000 0000 0000 1111 1000 0000 0000
+
+    c0.r = r << 3 | r >> 2;
+    c0.g = g << 2 | g >> 3;
+    c0.b = b << 3 | r >> 2;
+    c0 /= 255;
+
+    b = (code & 0x1F0000) >> 16;    //0000 0000 0001 1111 0000 0000 0000 0000
+    g = (code & 0x7E00000) >> 21;   //0000 0111 1110 0000 0000 0000 0000 0000
+    r = (code & 0xF8000000) >> 27;  //1111 1000 0000 0000 0000 0000 0000 0000
+
+    c1.r = r << 3 | r >> 2;
+    c1.g = g << 2 | g >> 3;
+    c1.b = b << 3 | r >> 2;
+    c1 /= 255;
+
+    c2 = c0 * 0.66666666f + c1 * 0.33333333f;
+    c3 = c0 * 0.33333333f + c1 * 0.66666666f;
+    
+    uint2 blockIndex = id.xy;
+    blockIndex.x *= 4;
+    blockIndex.y = Height - 1 - id.y * 4;
+
+    for(int y = 0; y < 4; y++) {
+        for(int x = 0; x < 4; x++) {
+            switch(indices % 4) {
+                case 0:
+                    black = c0;
+                    break;
+
+                case 1:
+                    black = c1;
+                    break;
+
+                case 2:
+                    black = c2;
+                    break;
+
+                case 3:
+                    black = c3;
+                    break;
+            }
+            
+            black.a = a % 16 * 255 / 16;
+            Result[blockIndex + float2(x, -y)] = black;
+
+            indices >>= 2;
+            a >>= 4;
+        }
+
+        if (y >= 2)
+            a = chunk.alpha2;
+    }
+
+}
