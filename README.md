@@ -1,7 +1,7 @@
 # Grand Theft Auto for Unity #
 
 
-Grand Theft Auto for Unity is a project to import files/map of Grand Theft Auto games (3D era).
+Grand Theft Auto for Unity is a project to import files/map of Grand Theft Auto games (3D era) into Unity.
 
 I'm not willing to recreate GTA inside Unity (that would be practically impossible), this is just a tool to import the map and files, it's also a good source of knowledge if you want to learn about compute shaders, surface shaders, custom editor windows, general C# scripting, how the games were back in the 2000s and so on.
 
