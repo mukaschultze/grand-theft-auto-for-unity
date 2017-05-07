@@ -3,10 +3,8 @@
         _Color ("Color", Color) = (1,1,1,1)
 		 _Layer ("Layer", int) = 0
 
-		[NoScaleOffset] _MainTex ("Albedo (RGB)", 2D) = "white" {
-            }
-		[NoScaleOffset] _MaskTex ("Mask (A)", 2D) = "white" {
-            }
+		[NoScaleOffset] _MainTex ("Albedo (RGB)", 2D) = "white" { }
+		[NoScaleOffset] _MaskTex ("Mask (A)", 2D) = "white" { }
 
 		_Ambient ("Ambient", Range(0,1)) = 1.0
 		_Diffuse ("Diffuse", Range(0,1)) = 1.0
@@ -19,8 +17,7 @@
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", int) = 0
 	}
 	SubShader {
-        Tags {
-            "RenderType"="Opaque" }
+        Tags { "RenderType"="Opaque" }
 		LOD 200
         Cull [_Cull]
 		Blend [_SrcBlend] [_DstBlend]
@@ -38,8 +35,8 @@
 		struct Input {
             float2 uv_MainTex;
             float4 color : COLOR;
-        }
-;
+        };
+
         sampler2D _MainTex;
         sampler2D _MaskTex;
         int _Layer;
