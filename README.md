@@ -32,10 +32,4 @@ You need to provide the full game to be able to load the maps, this extension do
 * IMG
 * Water (partial support, the script that loads it needs to be rewritten)
 
-### Screenshots ###
-More screenshot are in the assets folder
-
 ![GTASA_GoldenGate.png](https://bitbucket.org/repo/z88zyLX/images/2056598968-GTASA_GoldenGate.png)
-![GTAIII_Map.png](https://bitbucket.org/repo/z88zyLX/images/3351617977-GTAIII_Map.png)
-![GTASA_69Area.jpg](https://bitbucket.org/repo/z88zyLX/images/2066723763-GTASA_69Area.jpg)
-![GTASA_Map.png](https://bitbucket.org/repo/z88zyLX/images/1753671122-GTASA_Map.png)
