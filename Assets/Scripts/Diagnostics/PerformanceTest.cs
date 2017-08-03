@@ -30,20 +30,17 @@ namespace GrandTheftAuto.Diagnostics {
                 var stopwatch = new Stopwatch();
                 var log = new StringBuilder();
 
-                for(var i = 0; i < Actions.Count; i++)
-                    stopwatch = new Stopwatch();
+                foreach(var action in Actions)
+                    using(new Timing(action.Method.Name)) {
+                        stopwatch.Reset();
+                        stopwatch.Start();
 
-                foreach(var action in Actions) {
-                    stopwatch.Start();
-
-                    using(new Timing(action.Method.Name))
                         for(var loop = 0; loop < Loops; loop++)
                             action();
 
-                    stopwatch.Stop();
-                    log.AppendFormat("{0} calls on {1} took {2}\n", Loops, action.Method.Name, stopwatch.Elapsed.GetLongTimeFormatted());
-                    stopwatch.Reset();
-                }
+                        stopwatch.Stop();
+                        log.AppendFormat("{0} calls on {1} took {2}\n", Loops, action.Method.Name, stopwatch.Elapsed.GetLongTimeFormatted());
+                    }
 
                 Log.Message(log);
             }

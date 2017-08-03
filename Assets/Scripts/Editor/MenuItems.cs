@@ -14,33 +14,32 @@ namespace GrandTheftAuto.Editor {
     internal static class MenuItems {
 
         #region Testing
-        private const int TEST_COUNT = 1;
+        private const int TEST_COUNT = 1000000;
         private const int TEST_ORDER = -10000;
         private const string TEST = "Grand Theft Auto/Performance Test";
 
-        private static void Test1() {
-            var go = Selection.activeGameObject;
-            var light = go.GetComponent<Light>();
+        private static GameObject selectedObject;
+        private static MonoBehaviour dummyComponent;
+        private static bool dummyBool;
 
-            light.colorTemperature = 5500f;
-            UnityEngine.Rendering.GraphicsSettings.lightsUseColorTemperature = true;
-            UnityEngine.Rendering.GraphicsSettings.lightsUseLinearIntensity = true;
+        public static void Test1() {
+            selectedObject = Selection.activeGameObject;
         }
 
         private static void Test2() {
-
+            dummyComponent = selectedObject.GetComponent<MonoBehaviour>();
         }
 
         private static void Test3() {
-
+            dummyBool = ((object)dummyComponent).Equals(dummyComponent); //128.680ms
         }
 
         private static void Test4() {
-
+            dummyBool = dummyComponent.Equals(dummyComponent); //128.680ms
         }
 
         private static void Test5() {
-
+            dummyBool = ReferenceEquals(dummyComponent, null); //33.083ms
         }
 
         [MenuItem(TEST, false, TEST_ORDER)]
