@@ -54,8 +54,7 @@ namespace GrandTheftAuto {
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    using(var input = process.StandardInput)
-                    using(var writer = new BinaryWriter(input.BaseStream)) {
+                    using(var writer = new BinaryWriter(process.StandardInput.BaseStream)) {
                         EncodeSettings(writer);
                         writer.Flush();
                         process.WaitForExit();
