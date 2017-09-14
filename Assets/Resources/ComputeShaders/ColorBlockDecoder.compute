@@ -5,20 +5,20 @@ int Height;
 RWTexture2D<float4> Result;
 StructuredBuffer<uint> Data;
 
-[numthreads(8,8,1)]
-void Decode (uint3 id : SV_DispatchThreadID){
-    float4 color = float4(0, 0, 0, 0);
-    uint data = Data[id.x + Width * id.y];
+[numthreads(8, 8, 1)]
+void Decode(uint3 id : SV_DispatchThreadID) {
+	float4 color = float4(0, 0, 0, 0);
+	uint data = Data[id.x + Width * id.y];
 
-    color.a = data & 0xFF000000;
-    color.r = data & 0x00FF0000;
-    color.g = data & 0x0000FF00;
-    color.b = data & 0x000000FF;
+	color.a = data & 0xFF000000;
+	color.r = data & 0x00FF0000;
+	color.g = data & 0x0000FF00;
+	color.b = data & 0x000000FF;
 
-    color.a /= 0xFF000000;
-    color.r /= 0x00FF0000;
-    color.g /= 0x0000FF00;
-    color.b /= 0x000000FF;
+	color.a /= 0xFF000000;
+	color.r /= 0x00FF0000;
+	color.g /= 0x0000FF00;
+	color.b /= 0x000000FF;
 
-    Result[float2(id.x, Height - 1 - id.y)] = color;
+	Result[float2(id.x, Height - 1 - id.y)] = color;
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Renderwave;
-using UnityEngine;
 using GrandTheftAuto.Txd.Decoding;
+using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
 
 namespace GrandTheftAuto.Txd {
