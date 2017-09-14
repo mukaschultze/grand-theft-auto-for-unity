@@ -214,7 +214,10 @@ namespace GrandTheftAuto.Editor {
             switch(Event.current.type) {
                 case EventType.MouseDown:
                     if(Event.current.button == 0 && rect.Contains(Event.current.mousePosition)) {
-                        selectedLogIndex = index;
+                        if(Event.current.clickCount >= 2)
+                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(log.FileName, log.LineNumber);
+                        else
+                            selectedLogIndex = index;
                         Event.current.Use();
                     }
                     break;

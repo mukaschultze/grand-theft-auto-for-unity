@@ -15,6 +15,10 @@ namespace GrandTheftAuto.Diagnostics {
         [SerializeField]
         private string logString;
         [SerializeField]
+        private string fileName;
+        [SerializeField]
+        private int lineNumber;
+        [SerializeField]
         private string stackTrace;
         [SerializeField]
         private LogType type;
@@ -30,6 +34,14 @@ namespace GrandTheftAuto.Diagnostics {
         public LogType Type {
             get { return type; }
             set { type = value; }
+        }
+        public string FileName {
+            get { return fileName; }
+            set { fileName = value; }
+        }
+        public int LineNumber {
+            get { return lineNumber; }
+            set { lineNumber = value; }
         }
 
         public static int MessagesCount { get; private set; }
@@ -135,11 +147,15 @@ namespace GrandTheftAuto.Diagnostics {
                 if(string.IsNullOrEmpty(exceptionStack)) {
                     var stack = new StackFrame(2, true);
 
-                    if(!string.IsNullOrEmpty(stack.GetFileName()))
-                        current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(stack.GetFileName()), stack.GetFileLineNumber());
+                    if(!string.IsNullOrEmpty(stack.GetFileName())) {
+                        current.FileName = stack.GetFileName();
+                        current.LineNumber = stack.GetFileLineNumber();
+                        current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(current.FileName), current.LineNumber);
+                    }
                 }
-                else
+                else {
                     current.StackTrace = exceptionStack;
+                }
 
                 AllLogs.Add(current);
                 writer.WriteLine(current);
