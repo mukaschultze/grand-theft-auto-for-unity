@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Dff;
@@ -64,6 +65,7 @@ namespace GrandTheftAuto {
 
         public void Load() {
             using(new Timing("Loading " + Version.GetFormatedGTAName(true)))
+            using(new TempCultureInfo(CultureInfo.InvariantCulture))
             using(new MemoryCounter())
             using(var workingFolder = new TempWorkingFolder(Path))
             using(var progress = new ProgressBar("Loading " + Version.GetFormatedGTAName() + " map", 0, workingFolder, 32))
