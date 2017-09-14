@@ -18,28 +18,24 @@ namespace GrandTheftAuto.Editor {
         private const int TEST_ORDER = -10000;
         private const string TEST = "Grand Theft Auto/Performance Test";
 
-        private static GameObject selectedObject;
-        private static MonoBehaviour dummyComponent;
-        private static bool dummyBool;
-
         public static void Test1() {
-            selectedObject = Selection.activeGameObject;
+
         }
 
         private static void Test2() {
-            dummyComponent = selectedObject.GetComponent<MonoBehaviour>();
+
         }
 
         private static void Test3() {
-            dummyBool = ((object)dummyComponent).Equals(dummyComponent); //128.680ms
+
         }
 
         private static void Test4() {
-            dummyBool = dummyComponent.Equals(dummyComponent); //128.680ms
+
         }
 
         private static void Test5() {
-            dummyBool = ReferenceEquals(dummyComponent, null); //33.083ms
+
         }
 
         [MenuItem(TEST, false, TEST_ORDER)]
@@ -114,9 +110,28 @@ namespace GrandTheftAuto.Editor {
 
         #region Load GTA Map
         private const int LOAD_GTA_ORDER = -100;
+        private const string RESET_CURRENT_LOADER = "Grand Theft Auto/Reset Current Loader (Debug)";
         private const string LOAD_GTA_III = "Grand Theft Auto/Load GTA III Map";
         private const string LOAD_GTA_VC = "Grand Theft Auto/Load GTA Vice City Map";
         private const string LOAD_GTA_SA = "Grand Theft Auto/Load GTA San Andreas Map";
+
+        [MenuItem(RESET_CURRENT_LOADER, false, LOAD_GTA_ORDER)]
+        private static void ResetLoader() {
+            if(Loader.Current != null)
+                try {
+                    Loader.Current.Dispose();
+                    Log.Message("Active loader disposed");
+                    Debug.Log("Active loader disposed");
+                }
+                catch(Exception e) {
+                    Log.Exception(e);
+                    Debug.LogException(e);
+                }
+            else {
+                Log.Message("There's no active loader");
+                Debug.Log("There's no active loader");
+            }
+        }
 
         [MenuItem(LOAD_GTA_III, false, LOAD_GTA_ORDER)]
         private static void LoadGTAIII() {
