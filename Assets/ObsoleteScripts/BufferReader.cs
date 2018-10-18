@@ -1,15 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using GrandTheftAuto.Diagnostics;
 
 namespace GrandTheftAuto {
     public class BufferReader : IDisposable {
 
         public Stream BaseStream { get { return reader.BaseStream; } }
+
         public long Position {
             get { return BaseStream.Position; }
             set { BaseStream.Position = value; }
         }
+
         public long Length { get { return BaseStream.Length; } }
 
         private BinaryReader reader;

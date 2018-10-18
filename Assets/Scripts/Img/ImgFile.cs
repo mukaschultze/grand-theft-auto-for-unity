@@ -111,8 +111,12 @@ namespace GrandTheftAuto.Img {
         }
 
         public static ImgFile GetMainImg(GtaVersion version) {
+            return new ImgFile(GetMainImgPath(version), version);
+        }
+
+        public static string GetMainImgPath(GtaVersion version) {
             var gtaPath = Directories.GetPathFromVersion(version);
-            return new ImgFile(Path.Combine(gtaPath, IMG_MAIN), version);
+            return Path.Combine(gtaPath, IMG_MAIN);
         }
 
         IEnumerator<FileEntry> IEnumerable<FileEntry>.GetEnumerator() {
