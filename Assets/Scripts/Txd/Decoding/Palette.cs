@@ -1,4 +1,5 @@
 ﻿using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
 
@@ -15,26 +16,24 @@ namespace GrandTheftAuto.Txd.Decoding {
 
         public override UnityTexture DecodeTextureWithProcessor(BufferReader reader, int width, int height, RasterFormat rasterFormat) {
             using(new Timing("Palette Decoding")) {
+
                 var texture = GetTexture2D(width, height, rasterFormat);
                 var pixelCount = width * height;
-                var palette = new Color32[256];
                 var colors = new Color32[pixelCount];
-                var buffer = reader.ReadBytes(1024);
-
-                for(var i = 0; i < 256; i++)
-                    palette[i] = new Color32() {
-                        r = buffer[i * 4 + 0],
-                        g = buffer[i * 4 + 1],
-                        b = buffer[i * 4 + 2],
-                        a = buffer[i * 4 + 3],
-                    };
-
-                reader.SkipStream(4); //Data size
-                buffer = reader.ReadBytes(pixelCount);
+                var buffer = reader.ReadBytes(1024 + 4 + pixelCount); // 1024 bytes for palette, 4 bytes for data size
 
                 for(var x = 0; x < width; x++)
-                    for(var y = 0; y < height; y++)
-                        colors[x + width * (height - y - 1)] = palette[buffer[x + width * y]];
+                    for(var y = 0; y < height; y++) {
+                        var palIndex = buffer[1028 + x + width * y] * 4;
+                        var colorIndex = x + width * (height - y - 1); // Palette textures are iverted
+
+                        colors[colorIndex] = new Color32() {
+                            r = buffer[palIndex + 0],
+                            g = buffer[palIndex + 1],
+                            b = buffer[palIndex + 2],
+                            a = buffer[palIndex + 3]
+                        };
+                    };
 
                 texture.SetPixels32(colors);
                 texture.Apply(UseMipmaps, false);
