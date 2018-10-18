@@ -6,7 +6,7 @@ using System.Threading;
 using GrandTheftAuto.Diagnostics;
 using UnityEngine;
 
-namespace GrandTheftAuto {
+namespace GrandTheftAuto.Shared {
     public sealed class FileBrowser : CustomYieldInstruction {
         private bool _keepWaiting = true;
         private Process process;
@@ -21,8 +21,9 @@ namespace GrandTheftAuto {
         public bool IsSavePanel { get; private set; }
         public string FileName { get { return FileNames.FirstOrDefault(); } }
         public string[] FileNames { get; private set; }
+
         public override bool keepWaiting { get { return _keepWaiting; } }
-        public static string ApplicationPath { get { return Path.Combine(Application.streamingAssetsPath, "FileBrowser/FileBrowser.exe"); } }
+        public static string ApplicationPath { get { return Settings.Instance.fileBrowser; } }
 
         private void Execute() {
             if(!File.Exists(ApplicationPath))
@@ -34,12 +35,12 @@ namespace GrandTheftAuto {
                 using(process) {
                     process = new Process() {
                         StartInfo = new ProcessStartInfo() {
-                            FileName = ApplicationPath,
-                            CreateNoWindow = true,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            RedirectStandardInput = true,
-                            UseShellExecute = false
+                        FileName = ApplicationPath,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        RedirectStandardInput = true,
+                        UseShellExecute = false
                         }
                     };
                     process.OutputDataReceived += (sender, data) => {
@@ -62,8 +63,7 @@ namespace GrandTheftAuto {
 
                     FileNames = results.ToArray();
                 }
-            }
-            finally {
+            } finally {
                 _keepWaiting = false;
             }
         }
@@ -101,10 +101,10 @@ namespace GrandTheftAuto {
         public static string OpenFile(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] filters) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                DefaultExtension = defaultExtension,
-                Filters = string.Join(";", filters)
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    DefaultExtension = defaultExtension,
+                    Filters = string.Join(";", filters)
             };
             browser.Execute();
             return browser.FileName;
@@ -137,11 +137,11 @@ namespace GrandTheftAuto {
         public static string[] OpenFiles(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] filters) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                DefaultExtension = defaultExtension,
-                Filters = string.Join(";", filters),
-                MultiSelect = true
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    DefaultExtension = defaultExtension,
+                    Filters = string.Join(";", filters),
+                    MultiSelect = true
             };
             browser.Execute();
             return browser.FileNames;
@@ -175,11 +175,11 @@ namespace GrandTheftAuto {
         public static string SaveFile(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] allowedExtensions) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                Filters = string.Join(";", allowedExtensions),
-                MultiSelect = true,
-                IsSavePanel = true
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    Filters = string.Join(";", allowedExtensions),
+                    MultiSelect = true,
+                    IsSavePanel = true
             };
             browser.Execute();
             return browser.FileName;
@@ -200,10 +200,10 @@ namespace GrandTheftAuto {
         public static FileBrowser OpenFileAsync(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] filters) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                DefaultExtension = defaultExtension,
-                Filters = string.Join(";", filters)
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    DefaultExtension = defaultExtension,
+                    Filters = string.Join(";", filters)
             };
             browser.ExecuteAsync();
             return browser;
@@ -236,11 +236,11 @@ namespace GrandTheftAuto {
         public static FileBrowser OpenFilesAsync(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] filters) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                DefaultExtension = defaultExtension,
-                Filters = string.Join(";", filters),
-                MultiSelect = true
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    DefaultExtension = defaultExtension,
+                    Filters = string.Join(";", filters),
+                    MultiSelect = true
             };
             browser.ExecuteAsync();
             return browser;
@@ -274,11 +274,11 @@ namespace GrandTheftAuto {
         public static FileBrowser SaveFileAsync(string title, string defaultDirectory, string defaultFilename, string defaultExtension, params string[] allowedExtensions) {
             var browser = new FileBrowser() {
                 Title = title,
-                DefaultDirectory = defaultDirectory,
-                DefaultName = defaultFilename,
-                Filters = string.Join(";", allowedExtensions),
-                MultiSelect = true,
-                IsSavePanel = true
+                    DefaultDirectory = defaultDirectory,
+                    DefaultName = defaultFilename,
+                    Filters = string.Join(";", allowedExtensions),
+                    MultiSelect = true,
+                    IsSavePanel = true
             };
             browser.ExecuteAsync();
             return browser;

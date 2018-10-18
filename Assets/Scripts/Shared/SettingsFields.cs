@@ -16,11 +16,13 @@ namespace GrandTheftAuto.Shared {
         public bool useMipmaps;
         public string logFilePath;
         public string timingsFolder;
+        public string fileBrowser;
 
         public Settings() {
             numberOfThreads = SystemInfo.processorCount;
             logFilePath = Path.Combine(Application.streamingAssetsPath, "Logs", "log.txt");
             timingsFolder = Path.Combine(Application.streamingAssetsPath, "Timings");
+            fileBrowser = Path.Combine(Application.streamingAssetsPath, "FileBrowser", "FileBrowser.exe");
         }
 
         public void OnBeforeSerialize() { }
