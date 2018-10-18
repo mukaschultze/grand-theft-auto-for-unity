@@ -3,6 +3,7 @@
 using UnityEditor;
 #endif
 using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 
 namespace GrandTheftAuto {
     public class ProgressBar : IDisposable {
@@ -46,7 +47,7 @@ namespace GrandTheftAuto {
                 return Canceled;
 
             using(new Timing("Progress Bar")) {
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 var folder = (TempWorkingFolder)null;
 
                 if(WorkingFolder != null)
@@ -57,14 +58,14 @@ namespace GrandTheftAuto {
 
                 if(folder != null)
                     folder.Dispose();
-#endif
+                #endif
 
                 return Canceled;
             }
         }
 
         public void Dispose() {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             var folder = (TempWorkingFolder)null;
 
             if(WorkingFolder != null)
@@ -74,7 +75,7 @@ namespace GrandTheftAuto {
 
             if(folder != null)
                 folder.Dispose();
-#endif
+            #endif
         }
     }
 }
