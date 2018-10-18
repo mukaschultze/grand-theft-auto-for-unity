@@ -6,31 +6,26 @@ using GrandTheftAuto.Diagnostics;
 using UnityEngine;
 
 namespace GrandTheftAuto.Shared {
-    public delegate void ThreadJob();
-
-    public delegate void IndexedThreadJob(int index);
-
-    public delegate void ParameterizedThreadJob<T>(T obj);
 
     public class ThreadPool {
 
         private const int DEFAULT_QUEUE_SIZE = 4096;
 
         private Thread[] threads;
-        private Queue<ThreadJob> jobs;
+        private Queue<Action> jobs;
 
         public bool Started { get; private set; }
         public int ThreadCount { get { return threads.Length; } }
 
         public ThreadPool() {
-            jobs = new Queue<ThreadJob>(DEFAULT_QUEUE_SIZE);
+            jobs = new Queue<Action>(DEFAULT_QUEUE_SIZE);
             threads = new Thread[Settings.Instance.numberOfThreads];
 
             for(var i = 0; i < threads.Length; i++)
                 threads[i] = new Thread(ThreadBody);
         }
 
-        public void PushJob(ThreadJob job) {
+        public void PushJob(Action job) {
             if(Started)
                 throw new InvalidOperationException("Cannot add jobs to an already started thread pool");
 
@@ -47,13 +42,16 @@ namespace GrandTheftAuto.Shared {
             Started = true;
         }
 
-        public void WaitUntilAllFinished() {
-            for(var i = 0; i < threads.Length; i++)
+        public void WaitUntilFinished() {
+            for(var i = 0; i < threads.Length; i++) {
                 threads[i].Join();
+                threads[i].Abort();
+                Log.Message(threads[i].IsAlive);
+            }
         }
 
         private void ThreadBody() {
-            ThreadJob job = null;
+            Action job = null;
 
             while(true) {
                 lock(jobs) {
@@ -65,7 +63,7 @@ namespace GrandTheftAuto.Shared {
 
                 try {
                     job.Invoke();
-                    Debug.Log("Processing job");
+                    // Debug.Log("Processing job");
                 }
                 catch(Exception e) {
                     Debug.LogException(e);
@@ -73,7 +71,7 @@ namespace GrandTheftAuto.Shared {
             }
         }
 
-        public static ThreadPool ForLoop(int length, IndexedThreadJob job) {
+        public static ThreadPool ForLoop(int length, Action<int> job) {
 
             var pool = new ThreadPool();
             var chunkSize = Mathf.Max(length / pool.ThreadCount, 1);
@@ -94,7 +92,32 @@ namespace GrandTheftAuto.Shared {
 
         }
 
-        public static ThreadPool ForeachLoop<T>(T[] array, ParameterizedThreadJob<T> job) {
+        public static ThreadPool ForLoop(int lengthX, int lengthY, Action<int, int> job) {
+
+            var pool = new ThreadPool();
+            var totalLength = lengthX * lengthY;
+            var chunkSize = Mathf.Max(totalLength / pool.ThreadCount, 1);
+
+            for(int i = 0; i < pool.ThreadCount; i++) {
+                var startIndex = i * chunkSize;
+                var endIndex = Mathf.Min((i + 1) * chunkSize, totalLength);
+
+                if(startIndex < endIndex)
+                    pool.PushJob(() => {
+                        for(var j = startIndex; j < endIndex; j++) {
+                            var x = j % lengthX;
+                            var y = j / lengthX;
+                            job.Invoke(x, y);
+                        }
+                    });
+            }
+
+            pool.Start();
+            return pool;
+
+        }
+
+        public static ThreadPool ForeachLoop<T>(T[] array, Action<T> job) {
 
             var pool = new ThreadPool();
             var chunkSize = Mathf.Max(array.Length / pool.ThreadCount, 1);
