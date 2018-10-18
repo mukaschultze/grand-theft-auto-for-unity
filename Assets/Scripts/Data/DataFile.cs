@@ -5,6 +5,7 @@ using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Ide;
 using GrandTheftAuto.Img;
 using GrandTheftAuto.Ipl;
+using GrandTheftAuto.Shared;
 using GrandTheftAuto.Txd;
 
 namespace GrandTheftAuto.Data {

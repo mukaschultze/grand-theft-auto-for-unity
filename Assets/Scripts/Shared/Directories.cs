@@ -2,9 +2,8 @@
 using System.IO;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Diagnostics;
-using GrandTheftAuto.Shared;
 
-namespace GrandTheftAuto {
+namespace GrandTheftAuto.Shared {
     public static class Directories {
 
         public const string EXE_GTA_III = "gta3.exe";

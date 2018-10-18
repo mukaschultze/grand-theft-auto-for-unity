@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 
 namespace GrandTheftAuto.Img {
     public class ImgFile : IEnumerable<FileEntry> {
@@ -16,14 +17,14 @@ namespace GrandTheftAuto.Img {
         private Dictionary<string, FileEntry> entries;
         private BufferReader reader;
 
-        public int EntriesCount { get { if(!loaded) LoadEntries(); return entriesCount; } }
+        public int EntriesCount { get { if(!loaded)LoadEntries(); return entriesCount; } }
         public string FilePath { get { return ArchiveFile.FilePath; } }
         public GtaVersion Version { get; private set; }
 
         public FileEntry ArchiveFile { get; private set; }
-        public FileEntry[] Entries { get { if(!loaded) LoadEntries(); return entriesArray; } }
-        public FileEntry this[int index] { get { if(!loaded) LoadEntries(); return entriesArray[index]; } }
-        public FileEntry this[string fileName] { get { if(!loaded) LoadEntries(); return entries[fileName]; } }
+        public FileEntry[] Entries { get { if(!loaded)LoadEntries(); return entriesArray; } }
+        public FileEntry this[int index] { get { if(!loaded)LoadEntries(); return entriesArray[index]; } }
+        public FileEntry this[string fileName] { get { if(!loaded)LoadEntries(); return entries[fileName]; } }
 
         public ImgFile(string path) : this(new FileEntry(path)) { }
 
@@ -76,8 +77,12 @@ namespace GrandTheftAuto.Img {
                     var length = reader.ReadInt32() * 2048;
                     var name = reader.ReadBytes(24).GetNullTerminatedString();
 
-                    try { entries.Add(name, new FileEntry(ArchiveFile, name, pos, length)); }
-                    catch { Log.Error("Duplicated entry name \"{0}\" in \"{1}\"", name, FilePath); }
+                    try {
+                        entries.Add(name, new FileEntry(ArchiveFile, name, pos, length));
+                    }
+                    catch {
+                        Log.Error("Duplicated entry name \"{0}\" in \"{1}\"", name, FilePath);
+                    }
                 }
 
                 if(entries.Count != entriesCount)
