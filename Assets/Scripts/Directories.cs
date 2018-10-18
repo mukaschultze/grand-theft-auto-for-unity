@@ -2,28 +2,43 @@
 using System.IO;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 
 namespace GrandTheftAuto {
     public static class Directories {
+
         public const string EXE_GTA_III = "gta3.exe";
         public const string EXE_GTA_VC = "gta-vc.exe";
         public const string EXE_GTA_SA = "gta_sa.exe";
 
-        private static PrefItem<string> iiiDir = new PrefItem<string>("GrandTheftAuto.Directories.iiiDir");
-        private static PrefItem<string> vcDir = new PrefItem<string>("GrandTheftAuto.Directories.vcDir");
-        private static PrefItem<string> saDir = new PrefItem<string>("GrandTheftAuto.Directories.saDir");
-
         public static string IIIDirectory {
-            get { return iiiDir; }
-            set { iiiDir.Value = value; }
+            get {
+                return Settings.Instance.gtaIII;
+            }
+            set {
+                Settings.Instance.gtaIII = value;
+                Settings.Instance.SaveSettingsFile();
+            }
         }
+
         public static string ViceCityDirectory {
-            get { return vcDir; }
-            set { vcDir.Value = value; }
+            get {
+                return Settings.Instance.gtaVC;
+            }
+            set {
+                Settings.Instance.gtaVC = value;
+                Settings.Instance.SaveSettingsFile();
+            }
         }
+
         public static string SanAndreasDirectory {
-            get { return saDir; }
-            set { saDir.Value = value; }
+            get {
+                return Settings.Instance.gtaSA;
+            }
+            set {
+                Settings.Instance.gtaSA = value;
+                Settings.Instance.SaveSettingsFile();
+            }
         }
 
         public static string GetPathFromVersion(GtaVersion version) {
@@ -97,6 +112,7 @@ namespace GrandTheftAuto {
         }
 
         public static GtaVersion GetVersionFromPath(string path) {
+
             if(!File.Exists(Path.Combine(path, DataFile.DAT_MAIN)))
                 return GtaVersion.Unknown;
 
@@ -110,6 +126,7 @@ namespace GrandTheftAuto {
                 return GtaVersion.SanAndreas;
 
             return GtaVersion.Unknown;
+
         }
     }
 }

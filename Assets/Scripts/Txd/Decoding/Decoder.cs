@@ -1,4 +1,5 @@
 ﻿using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
 
@@ -11,12 +12,20 @@ namespace GrandTheftAuto.Txd.Decoding {
         protected uint threadsZ;
         protected ComputeShader shader;
 
-        public static PrefItem<bool> UseMipmaps = new PrefItem<bool>("GrandTheftAuto.Txd.Decoding.UseMipmaps", true);
-        public static PrefItem<bool> GPUDecodingPref = new PrefItem<bool>("GrandTheftAuto.Txd.Decoding.GPUDecodingPref", SystemInfo.supportsComputeShaders);
+        public static bool UseMipmaps {
+            get { return Settings.Instance.useMipmaps; }
+            set {
+                Settings.Instance.useMipmaps = value;
+                Settings.Instance.SaveSettingsFile();
+            }
+        }
 
         public static bool GPUDecoding {
-            get { return GPUDecodingPref && SystemInfo.supportsComputeShaders; }
-            set { GPUDecodingPref.Value = value; }
+            get { return SystemInfo.supportsComputeShaders && Settings.Instance.gpuDecoding; }
+            set {
+                Settings.Instance.gpuDecoding = value;
+                Settings.Instance.SaveSettingsFile();
+            }
         }
 
         public static DXT3 DXT3 = new DXT3();
@@ -78,16 +87,16 @@ namespace GrandTheftAuto.Txd.Decoding {
             switch(format) {
                 case RasterFormat.Format_555:
                 case RasterFormat.Format_565:
-                //result = RenderTextureFormat.RGB565;
-                //break;
+                    //result = RenderTextureFormat.RGB565;
+                    //break;
 
                 case RasterFormat.Format_1555:
-                //result = RenderTextureFormat.ARGB1555;
-                //break;
+                    //result = RenderTextureFormat.ARGB1555;
+                    //break;
 
                 case RasterFormat.Format_4444:
-                //result = RenderTextureFormat.ARGB4444;
-                //break;
+                    //result = RenderTextureFormat.ARGB4444;
+                    //break;
 
                 case RasterFormat.Format_888:
                 case RasterFormat.Format_8888:

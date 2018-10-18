@@ -5,6 +5,7 @@ using GrandTheftAuto.Dff;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Ide;
 using GrandTheftAuto.Img;
+using GrandTheftAuto.Shared;
 using GrandTheftAuto.Txd;
 using UnityEditor;
 using UnityEngine;
@@ -82,12 +83,14 @@ namespace GrandTheftAuto.Editor {
 
         [MenuItem(PREFERENCES_GPU_DECODING, false, PREFERENCES_ORDER)]
         private static void ChangeGPUDecoding() {
-            Decoder.GPUDecodingPref.Value = !Decoder.GPUDecodingPref;
+            Settings.Instance.gpuDecoding = !Settings.Instance.gpuDecoding;
+            Settings.Instance.SaveSettingsFile();
         }
 
         [MenuItem(PREFERENCES_MIPMAPS, false, PREFERENCES_ORDER)]
         private static void ChangeMipmaps() {
-            Decoder.UseMipmaps.Value = !Decoder.UseMipmaps;
+            Settings.Instance.useMipmaps = !Settings.Instance.useMipmaps;
+            Settings.Instance.SaveSettingsFile();
         }
 
         [MenuItem(PREFERENCES_GPU_DECODING, true)]
@@ -123,10 +126,10 @@ namespace GrandTheftAuto.Editor {
                     Log.Message("Active loader disposed");
                     Debug.Log("Active loader disposed");
                 }
-                catch(Exception e) {
-                    Log.Exception(e);
-                    Debug.LogException(e);
-                }
+            catch(Exception e) {
+                Log.Exception(e);
+                Debug.LogException(e);
+            }
             else {
                 Log.Message("There's no active loader");
                 Debug.Log("There's no active loader");
@@ -151,7 +154,7 @@ namespace GrandTheftAuto.Editor {
         private static void LoadMap(GtaVersion version) {
             if(EditorUtility.DisplayDialog("Load " + version.GetFormatedGTAName() + " map", "Are you sure you want to load the entire map of " + version.GetFormatedGTAName(true) + "?", "Load", "Cancel"))
                 using(var loader = new Loader(version))
-                    loader.Load();
+            loader.Load();
         }
         #endregion
 
@@ -214,16 +217,16 @@ namespace GrandTheftAuto.Editor {
                 foreach(var entry in img)
                     try {
                         using(new Timing("Writing File"))
-                            File.WriteAllBytes(Path.Combine(saveDirectory, entry.FileName), entry.GetData());
+                        File.WriteAllBytes(Path.Combine(saveDirectory, entry.FileName), entry.GetData());
 
                         progress.Increment(entry.FileName);
 
                         if(progress.Canceled)
                             break;
                     }
-                    catch {
-                        Log.Error("Failed to write: {0}", entry);
-                    }
+                catch {
+                    Log.Error("Failed to write: {0}", entry);
+                }
             }
         }
         #endregion
@@ -276,16 +279,16 @@ namespace GrandTheftAuto.Editor {
                 foreach(var texture in txd)
                     try {
                         using(new Timing("Asset writing"))
-                            AssetDatabase.CreateAsset(texture, Path.Combine(saveDirectory, texture.Name + ".asset"));
+                        AssetDatabase.CreateAsset(texture, Path.Combine(saveDirectory, texture.Name + ".asset"));
 
                         progress.Increment(texture.Name);
 
                         if(progress.Canceled)
                             break;
                     }
-                    catch(Exception e) {
-                        Log.Error("Failed to write texture: {0}", e);
-                    }
+                catch(Exception e) {
+                    Log.Error("Failed to write texture: {0}", e);
+                }
             }
         }
         #endregion
@@ -313,8 +316,8 @@ namespace GrandTheftAuto.Editor {
                 }
 
                 using(new Loader(itemDefinitions, modelCollection, textureCollection))
-                    foreach(var definition in itemDefinitions)
-                        definition.GetObject(true);
+                foreach(var definition in itemDefinitions)
+                    definition.GetObject(true);
             }
         }
         #endregion
@@ -331,7 +334,7 @@ namespace GrandTheftAuto.Editor {
 
             for(var format = (TextureFormat)0; format < (TextureFormat)62; format++)
                 try { str.AppendFormat("Format {0}: {1}\n", format, SystemInfo.SupportsTextureFormat(format) ? "Supported" : "Unsupported"); }
-                catch { str.AppendFormat("Format {0}: Error\n", format); }
+            catch { str.AppendFormat("Format {0}: Error\n", format); }
 
             Log.Message(str);
         }
@@ -342,7 +345,7 @@ namespace GrandTheftAuto.Editor {
 
             for(var format = (RenderTextureFormat)0; format < (RenderTextureFormat)24; format++)
                 try { str.AppendFormat("Format {0}: {1}\n", format, SystemInfo.SupportsRenderTextureFormat(format) ? "Supported" : "Unsupported"); }
-                catch { str.AppendFormat("Format {0}: Error\n", format); }
+            catch { str.AppendFormat("Format {0}: Error\n", format); }
 
             Log.Message(str);
         }
