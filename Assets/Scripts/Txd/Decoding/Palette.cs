@@ -36,7 +36,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                     };
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, false);
+                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
 
                 return texture;
             }

@@ -12,8 +12,9 @@ namespace GrandTheftAuto.Shared {
 
         public int numberOfThreads;
 
-        public bool gpuDecoding;
-        public bool useMipmaps;
+        public bool gpuDecoding = false;
+        public bool useMipmaps = false;
+        public bool compressTextures = true;
         public string logFilePath;
         public string timingsFolder;
         public string fileBrowser;

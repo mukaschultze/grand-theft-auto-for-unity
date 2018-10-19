@@ -36,5 +36,6 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
+Assets/StreamingAssets/settings.json
 Assets/Enhanced Hierarchy
 Assets/Enhanced Hierarchy.meta

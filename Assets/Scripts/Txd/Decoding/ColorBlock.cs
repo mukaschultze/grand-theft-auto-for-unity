@@ -1,4 +1,5 @@
 ﻿using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
 
@@ -30,7 +31,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                         };
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, false);
+                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
 
                 return texture;
             }

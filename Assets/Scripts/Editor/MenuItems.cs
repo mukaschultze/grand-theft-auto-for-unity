@@ -15,33 +15,41 @@ namespace GrandTheftAuto.Editor {
     internal static class MenuItems {
 
         #region Testing
-        private const int TEST_COUNT = 1000000;
+        private const int TEST_COUNT = 1;
         private const int TEST_ORDER = -10000;
         private const string TEST = "Grand Theft Auto/Performance Test";
 
         public static void Test1() {
-
+            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.III));
         }
 
         private static void Test2() {
-
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Threading.Thread.Sleep(1000);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private static void Test3() {
-
+            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.SanAndreas));
         }
 
         private static void Test4() {
-
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Threading.Thread.Sleep(1000);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private static void Test5() {
-
+            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.ViceCity));
         }
 
         [MenuItem(TEST, false, TEST_ORDER)]
         private static void Test() {
-            new PerformanceTest(TEST_COUNT, Test1, Test2, Test3, Test4, Test5).Run();
+            new PerformanceTest(TEST_COUNT, Test1, Test2, Test3, Test4, Test5, Test4).Run();
         }
         #endregion
 

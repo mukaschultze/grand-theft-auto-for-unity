@@ -1,6 +1,7 @@
 ﻿using System;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.Shared;
 using GrandTheftAuto.Txd.Decoding;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
@@ -19,7 +20,7 @@ namespace GrandTheftAuto.Txd {
 
         public RasterFormat RasterFormat { get { return (RasterFormat)((int)rawRasterFormat % 0x1000); } }
         public RasterFormat RasterFormatEx { get { return (rawRasterFormat - (int)rawRasterFormat % 0x1000); } }
-        public UnityTexture Texture2D { get { if(!loadedTexture) Load(); return loadedTexture; } }
+        public UnityTexture Texture2D { get { if(!loadedTexture)Load(); return loadedTexture; } }
 
         private int offset;
         private RasterFormat rawRasterFormat;
@@ -109,7 +110,7 @@ namespace GrandTheftAuto.Txd {
                     // What a waste of time
                     // But if we don't do this it's problaby the application will run out of memory
                     // And fucking freeze the entire computer...
-                    if(loadedTexture is Texture2D)
+                    if(loadedTexture is Texture2D && Settings.Instance.compressTextures)
                         using(new Timing("Compressing Texture")) {
                             (loadedTexture as Texture2D).Compress(false);
                             (loadedTexture as Texture2D).Apply(false, true);
@@ -118,8 +119,7 @@ namespace GrandTheftAuto.Txd {
                 catch(Exception e) {
                     Log.Warning("Failed to load texture \"{0}\": {1}", FullName, e);
                     loadedTexture = missing;
-                }
-                finally {
+                } finally {
                     reader.Position = position;
                     reader = null;
                 }

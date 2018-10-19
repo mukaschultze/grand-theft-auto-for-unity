@@ -1,5 +1,6 @@
 ﻿using System;
 using GrandTheftAuto.Diagnostics;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
 
@@ -34,16 +35,16 @@ namespace GrandTheftAuto.Txd.Decoding {
                         var code = reader.ReadUInt32();
                         var indices = reader.ReadUInt32();
 
-                        b = (code & 0x1F);         //0000 0000 0000 0000 0000 0000 0001 1111  
-                        g = (code & 0x7E0) >> 5;   //0000 0000 0000 0000 0000 0111 1110 0000
+                        b = (code & 0x1F); //0000 0000 0000 0000 0000 0000 0001 1111  
+                        g = (code & 0x7E0) >> 5; //0000 0000 0000 0000 0000 0111 1110 0000
                         r = (code & 0xF800) >> 11; //0000 0000 0000 0000 1111 1000 0000 0000
 
                         c0.r = (byte)(r << 3 | r >> 2);
                         c0.g = (byte)(g << 2 | g >> 3);
                         c0.b = (byte)(b << 3 | r >> 2);
 
-                        b = (code & 0x1F0000) >> 16;   //0000 0000 0001 1111 0000 0000 0000 0000
-                        g = (code & 0x7E00000) >> 21;  //0000 0111 1110 0000 0000 0000 0000 0000
+                        b = (code & 0x1F0000) >> 16; //0000 0000 0001 1111 0000 0000 0000 0000
+                        g = (code & 0x7E00000) >> 21; //0000 0111 1110 0000 0000 0000 0000 0000
                         r = (code & 0xF8000000) >> 27; //1111 1000 0000 0000 0000 0000 0000 0000
 
                         c1.r = (byte)(r << 3 | r >> 2);
@@ -85,7 +86,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                     }
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, false);
+                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
 
                 return texture;
             }
