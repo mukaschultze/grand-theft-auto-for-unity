@@ -37,5 +37,6 @@ sysinfo.txt
 *.unitypackage
 
 Assets/StreamingAssets/settings.json
+Assets/StreamingAssets/settings.json.meta
 Assets/Enhanced Hierarchy
 Assets/Enhanced Hierarchy.meta
