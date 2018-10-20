@@ -7,8 +7,8 @@ using GrandTheftAuto.Diagnostics;
 namespace GrandTheftAuto.Diagnostics {
 
     [Serializable]
-    public struct TimingData {
-        public string name;
+    public struct TimingSample {
+        public string label;
         public string stackClass;
         public int calls;
         public long ticksSelf;
@@ -20,10 +20,10 @@ namespace GrandTheftAuto.Diagnostics {
         private const int STACK_CAPACITY = 256;
         private const int DICTIONARY_CAPACITY = 128;
 
+        private static Stopwatch overhead = new Stopwatch();
         private static Stack<Timing> waiting = new Stack<Timing>(STACK_CAPACITY);
         private static Stack<Timing> running = new Stack<Timing>(STACK_CAPACITY);
-        private static Dictionary<string, TimingData> all = new Dictionary<string, TimingData>(DICTIONARY_CAPACITY);
-        private static Stopwatch overhead = new Stopwatch();
+        private static Dictionary<string, TimingSample> samples = new Dictionary<string, TimingSample>(DICTIONARY_CAPACITY);
 
         private string label;
         private Stopwatch self;
@@ -42,8 +42,11 @@ namespace GrandTheftAuto.Diagnostics {
         public static Timing Get(string label) {
             overhead.Start();
 
-            var parent = SafePeek(running);
-            var timing = MoveStack(waiting, running);
+            var parent = running.SafePeek();
+            var timing = StackUtility.MoveStack(waiting, running);
+
+            if(timing == null)
+                Log.Error("Not enough timing samples ({0})", STACK_CAPACITY);
 
             if(parent != null)
                 parent.self.Stop();
@@ -59,20 +62,20 @@ namespace GrandTheftAuto.Diagnostics {
         public void Dispose() {
             overhead.Start();
 
-            var timing = MoveStack(running, waiting);
-            var parent = SafePeek(running);
+            var timing = StackUtility.MoveStack(running, waiting);
+            var parent = running.SafePeek();
 
             if(timing != this)
                 Log.Error("Timings out of sync");
 
-            TimingData data;
+            TimingSample data;
 
-            all.TryGetValue(label, out data);
-            data.name = label;
+            samples.TryGetValue(label, out data);
+            data.label = label;
             data.calls++;
             data.ticksSelf += self.ElapsedTicks;
             data.ticksTotal += total.ElapsedTicks;
-            all[label] = data;
+            samples[label] = data;
 
             self.Reset();
             total.Reset();
@@ -80,40 +83,24 @@ namespace GrandTheftAuto.Diagnostics {
             if(parent != null)
                 parent.self.Start();
             else {
-                TimingSave.Dump(overhead.ElapsedTicks, all.Select(kvp => kvp.Value).ToArray());
+                TimingsContainer.Dump(overhead.ElapsedTicks, samples.Select(kvp => kvp.Value).ToArray());
                 overhead.Reset();
             }
 
             overhead.Stop();
         }
 
-        private static T MoveStack<T>(Stack<T> from, Stack<T> to) {
-            var obj = SafePop(from);
-            to.Push(obj);
-            return obj;
-        }
-
-        private static T SafePop<T>(Stack<T> stack) {
-            if(stack.Count > 0)
-                return stack.Pop();
-            else
-                return default(T);
-        }
-
-        private static T SafePeek<T>(Stack<T> stack) {
-            if(stack.Count > 0)
-                return stack.Peek();
-            else
-                return default(T);
-        }
-
-        public static Timing Begin() {
+        public static Timing Begin(string label = "main") {
             overhead.Reset();
             return Get("main");
         }
 
         public static Timing IO() {
             return Get("io");
+        }
+
+        public static Timing IO(bool read) {
+            return Get(read? "io/read": "io/write");
         }
 
         public static Timing Pause() {

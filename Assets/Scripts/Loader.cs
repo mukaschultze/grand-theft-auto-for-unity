@@ -65,7 +65,7 @@ namespace GrandTheftAuto {
             }
 
         public void Load() {
-            using(Timing.Get("Loading " + Version.GetFormatedGTAName(true)))
+            using(Timing.Begin("Loading " + Version.GetFormatedGTAName(true)))
             using(new TempCultureInfo(CultureInfo.InvariantCulture))
             using(new MemoryCounter())
             using(var workingFolder = new TempWorkingFolder(Path))

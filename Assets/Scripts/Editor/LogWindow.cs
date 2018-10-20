@@ -69,14 +69,17 @@ namespace GrandTheftAuto.Editor {
         private GUIContent tempContent = new GUIContent();
         [SerializeField]
         private List<Log> filteredLogs;
-        private static PrefItem<bool> showMessages = new PrefItem<bool>("GrandTheftAuto.Editor.LogWindow.showMessages", true);
-        private static PrefItem<bool> showWarnings = new PrefItem<bool>("GrandTheftAuto.Editor.LogWindow.showWarnings", true);
-        private static PrefItem<bool> showErrors = new PrefItem<bool>("GrandTheftAuto.Editor.LogWindow.showErrors", true);
+        private static PrefItem<bool> showMessages = new PrefItem<bool>("LogsShowMessages", true);
+        private static PrefItem<bool> showWarnings = new PrefItem<bool>("LogsShowWarnings", true);
+        private static PrefItem<bool> showErrors = new PrefItem<bool>("LogsShowErrors", true);
 
         private Log SelectedLog {
             get {
-                try { return filteredLogs[selectedLogIndex]; }
-                catch { return new Log(); }
+                try {
+                    return filteredLogs[selectedLogIndex];
+                } catch {
+                    return new Log();
+                }
             }
         }
 

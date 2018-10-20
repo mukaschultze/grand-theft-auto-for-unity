@@ -1,26 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using GrandTheftAuto.Shared;
 using GrandTheftAuto.Shared;
 using UnityEngine;
 
 namespace GrandTheftAuto.Diagnostics {
 
     [Serializable]
-    public struct TimingSaved {
+    public struct TimingsContainer {
         public long totalTicks;
         public long overheadTicks;
-        public TimingData[] data;
-    }
+        public TimingSample[] samples;
 
-    public static class TimingSave {
+        private static Action<TimingsContainer> m_onDump = (t) => { };
 
-        private static Action<TimingSaved> m_onDump = (t) => { };
-
-        public static Action<TimingSaved> OnDump {
+        public static Action<TimingsContainer> OnDump {
             get { return m_onDump; }
             set { m_onDump = value; }
         }
@@ -34,12 +28,12 @@ namespace GrandTheftAuto.Diagnostics {
             }
         }
 
-        public static void Dump(long overheadTicks, TimingData[] data) {
+        public static void Dump(long overheadTicks, TimingSample[] samples) {
 
-            var toSave = new TimingSaved() {
+            var toSave = new TimingsContainer() {
                 overheadTicks = overheadTicks,
-                totalTicks = data.Max(t => t.ticksTotal),
-                data = data
+                totalTicks = samples.Max(t => t.ticksTotal),
+                samples = samples
             };
 
             var path = GetNewFileName();
@@ -49,9 +43,9 @@ namespace GrandTheftAuto.Diagnostics {
             OnDump(toSave);
         }
 
-        public static TimingSaved Load(string path) {
+        public static TimingsContainer Load(string path) {
             var json = File.ReadAllText(path);
-            var obj = JsonUtility.FromJson<TimingSaved>(json);
+            var obj = JsonUtility.FromJson<TimingsContainer>(json);
 
             return obj;
         }
