@@ -21,8 +21,8 @@ namespace GrandTheftAuto.Shared {
 
         public Settings() {
             numberOfThreads = SystemInfo.processorCount;
-            logFilePath = Path.Combine(Application.streamingAssetsPath, "Logs", "log.txt");
-            timingsFolder = Path.Combine(Application.streamingAssetsPath, "Timings");
+            logFilePath = Path.Combine("log.txt");
+            timingsFolder = Path.Combine("Timings");
             fileBrowser = Path.Combine(Application.streamingAssetsPath, "FileBrowser", "FileBrowser.exe");
         }
 

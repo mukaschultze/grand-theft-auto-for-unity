@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 
 namespace GrandTheftAuto.Diagnostics {
+
     public struct TimingSample {
+
         private long durationTicks;
 
         public int Calls { get; set; }
@@ -22,9 +25,11 @@ namespace GrandTheftAuto.Diagnostics {
             }
             set { durationTicks = value.Ticks; }
         }
+
     }
 
     public class TimingGroup {
+
         public TimeSpan TotalTime { get; private set; }
         public TimeSpan OverheadTime { get; private set; }
         public TimingSample[] Timings { get; private set; }
@@ -70,6 +75,7 @@ namespace GrandTheftAuto.Diagnostics {
                 }
             }
         }
+
     }
 
     public class Timing : IDisposable {
@@ -84,7 +90,7 @@ namespace GrandTheftAuto.Diagnostics {
         public static bool Running { get { return current != null; } }
         public static string TimingsSaveFolder {
             get {
-                var folder = Path.Combine(Application.dataPath, "Timings");
+                var folder = Settings.Instance.timingsFolder;
                 if(!Directory.Exists(folder))
                     Directory.CreateDirectory(folder);
                 return folder;
@@ -103,8 +109,8 @@ namespace GrandTheftAuto.Diagnostics {
             if(!timings.TryGetValue(key, out info))
                 timings.Add(key, info = new TimingSample() {
                     Name = name,
-                    StackClass = stackClass,
-                    Stopwatch = new Stopwatch()
+                        StackClass = stackClass,
+                        Stopwatch = new Stopwatch()
                 });
 
             info.Calls++;
@@ -158,5 +164,7 @@ namespace GrandTheftAuto.Diagnostics {
         private static string GetUniqueTimingFileName() {
             return Path.Combine(TimingsSaveFolder, string.Format("Timing_{0:yyyy_MM_dd_HH_mm_ss}.timing", DateTime.Now));
         }
+
     }
+
 }

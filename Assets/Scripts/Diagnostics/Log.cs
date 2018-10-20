@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using GrandTheftAuto.Shared;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace GrandTheftAuto.Diagnostics {
     [Serializable]
     public struct Log {
-
-        private const string LOG_FILE = "Logs.txt";
-        private const string PREV_LOG_FILE = "Logs_prev.txt";
 
         [SerializeField]
         private string logString;
@@ -49,8 +47,8 @@ namespace GrandTheftAuto.Diagnostics {
         public static int ErrorsCount { get; private set; }
         public static List<Log> AllLogs { get; set; }
 
-        public static string LogFilePath { get { return Path.Combine(Environment.CurrentDirectory, LOG_FILE); } }
-        public static string PreviousLogPath { get { return Path.Combine(Environment.CurrentDirectory, PREV_LOG_FILE); } }
+        public static string LogFilePath { get { return Settings.Instance.logFilePath; } }
+        public static string PreviousLogPath { get { return LogFilePath + "_old"; } }
 
         private static Log current = new Log();
         private static readonly StreamWriter writer;
@@ -58,15 +56,22 @@ namespace GrandTheftAuto.Diagnostics {
         static Log() {
             AllLogs = new List<Log>(5000);
 
+            var folder = Path.GetDirectoryName(LogFilePath);
+
+            if(!string.IsNullOrEmpty(folder) && !Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
             try {
                 File.Delete(PreviousLogPath);
                 if(File.Exists(LogFilePath))
                     File.Move(LogFilePath, PreviousLogPath);
-            }
-            catch { /*Failed to move the old log, ♫♪ but I really don't care ♫♪*/ }
+            } catch { /*Failed to move the old log, ♫♪ but I really don't care ♫♪*/ }
 
-            try { writer = new StreamWriter(LogFilePath); }
-            catch { writer = new StreamWriter(LogFilePath + "_acessdenied"); /*This may happen if you open two instances of the program at once*/ }
+            try {
+                writer = new StreamWriter(LogFilePath);
+            } catch {
+                writer = new StreamWriter(LogFilePath + "_acessdenied"); /*This may happen if you open two instances of the program at once*/
+            }
 
             writer.AutoFlush = true;
             writer.WriteLine("\n=====================================");
@@ -152,15 +157,13 @@ namespace GrandTheftAuto.Diagnostics {
                         current.LineNumber = stack.GetFileLineNumber();
                         current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(current.FileName), current.LineNumber);
                     }
-                }
-                else {
+                } else {
                     current.StackTrace = exceptionStack;
                 }
 
                 AllLogs.Add(current);
                 writer.WriteLine(current);
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Debug.LogException(e);
             }
 

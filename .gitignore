@@ -38,5 +38,12 @@ sysinfo.txt
 
 Assets/StreamingAssets/settings.json
 Assets/StreamingAssets/settings.json.meta
+
 Assets/Enhanced Hierarchy
 Assets/Enhanced Hierarchy.meta
+
+Timings/
+
+log.txt
+log.txt_old
+log.txt_acessdenied
