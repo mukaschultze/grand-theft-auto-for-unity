@@ -176,37 +176,30 @@ namespace GrandTheftAuto.Diagnostics {
                     break;
             }
 
-            var timing = (Timing)null;
-
-            // if(Timing.Running)
-            //     timing = Timing.Get("Processing Logs");
-
+            // using(Timing.Get("Processing Logs"));
             try {
                 current.LogString = string.Format(message, args);
                 current.Type = type;
 
                 if(!string.IsNullOrEmpty(exceptionStack)) {
                     current.StackTrace = exceptionStack;
-                } else if(!Settings.Instance.stackTraceEnabled) {
-                    current.stackTrace = string.Empty;
-                } else {
-                    var stack = new StackFrame(2, true);
+                } // else if(!Settings.Instance.stackTraceEnabled) {
+                else current.stackTrace = string.Empty;
+                // } else {
+                //     var stack = new StackFrame(2, true);
 
-                    if(!string.IsNullOrEmpty(stack.GetFileName())) {
-                        current.FileName = stack.GetFileName();
-                        current.LineNumber = stack.GetFileLineNumber();
-                        current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(current.FileName), current.LineNumber);
-                    }
-                }
+                //     if(!string.IsNullOrEmpty(stack.GetFileName())) {
+                //         current.FileName = stack.GetFileName();
+                //         current.LineNumber = stack.GetFileLineNumber();
+                //         current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(current.FileName), current.LineNumber);
+                //     }
+                // }
 
                 AllLogs.Add(current);
                 writer.WriteLine(current);
             } catch(Exception e) {
                 Debug.LogException(e);
             }
-
-            if(timing != null)
-                timing.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

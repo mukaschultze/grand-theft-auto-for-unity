@@ -29,17 +29,14 @@ namespace GrandTheftAuto.Shared {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Settings LoadSettingsFile() {
-            using(Timing.IORead())
             if(File.Exists(SettingsFilePath) && m_readTime >= File.GetLastWriteTime(SettingsFilePath))
                 return m_settings;
 
-            Log.Message("Reloading settings file");
+            // Log.Message("Reloading settings file"); // Causes stackoverflow
 
             if(File.Exists(SettingsFilePath)) {
-                using(Timing.IORead()) {
-                    var json = File.ReadAllText(SettingsFilePath);
-                    JsonUtility.FromJsonOverwrite(json, m_settings);
-                }
+                var json = File.ReadAllText(SettingsFilePath);
+                JsonUtility.FromJsonOverwrite(json, m_settings);
             } else
                 m_settings.SaveSettingsFile();
 
@@ -56,20 +53,17 @@ namespace GrandTheftAuto.Shared {
         }
 
         public void SaveSettingsFile() {
-            using(Timing.IOWrite()) {
-                var json = JsonUtility.ToJson(this, true);
+            var json = JsonUtility.ToJson(this, true);
 
-                if(!Directory.Exists(Path.GetDirectoryName(SettingsFilePath)))
-                    Directory.CreateDirectory(Path.GetDirectoryName(SettingsFilePath));
+            if(!Directory.Exists(Path.GetDirectoryName(SettingsFilePath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(SettingsFilePath));
 
-                if(File.Exists(SettingsFilePath))
-                    File.Delete(SettingsFilePath);
+            if(File.Exists(SettingsFilePath))
+                File.Delete(SettingsFilePath);
 
-                File.WriteAllText(SettingsFilePath, json);
-                m_readTime = File.GetLastWriteTime(SettingsFilePath);
-                Log.Message("Settings file saved");
-            }
+            File.WriteAllText(SettingsFilePath, json);
+            m_readTime = File.GetLastWriteTime(SettingsFilePath);
+            Log.Message("Settings file saved");
         }
-
     }
 }

@@ -49,8 +49,8 @@ namespace GrandTheftAuto.Diagnostics {
             using(Overhead()) {
 
                 if(!isRunning) {
-                    Log.Warning("Atempt to usa Timings.Get() before Timings.Begin(), this is not allowed");
-                    return null;
+                    Log.Warning("Atempt to use Timings.Get() before Timings.Begin(), this is not allowed");
+                    return Begin();
                 }
 
                 var parent = running.SafePeek();
@@ -87,10 +87,10 @@ namespace GrandTheftAuto.Diagnostics {
                 data.ticksSelf += self.ElapsedTicks;
                 data.ticksTotal += total.ElapsedTicks;
 
-                if(Settings.Instance.stackTraceEnabled)
-                    data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
-                else
-                    data.stackClass = string.Empty;
+                // if(Settings.Instance.stackTraceEnabled)
+                //     data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
+                // else
+                data.stackClass = string.Empty;
 
                 samples[label] = data;
 
@@ -115,6 +115,13 @@ namespace GrandTheftAuto.Diagnostics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Timing Begin(string label = "main") {
+
+            if(isRunning) {
+                Log.Warning("Atempt to begin a Timing while another one is already running");
+                return null;
+            }
+
+            samples.Clear();
             ioWrite.Reset();
             ioRead.Reset();
             overhead.Reset();
@@ -126,8 +133,8 @@ namespace GrandTheftAuto.Diagnostics {
         public static IDisposable IORead() {
 
             if(!isRunning) {
-                Log.Warning("Atempt to usa Timings.IORead() before Timings.Begin(), this is not allowed");
-                return null;
+                Log.Warning("Atempt to use Timings.IORead() before Timings.Begin(), this is not allowed");
+                return Begin();
             }
 
             ioRead.Start(running.SafePeek().self);
@@ -138,8 +145,8 @@ namespace GrandTheftAuto.Diagnostics {
         public static IDisposable IOWrite() {
 
             if(!isRunning) {
-                Log.Warning("Atempt to usa Timings.IOWrite() before Timings.Begin(), this is not allowed");
-                return null;
+                Log.Warning("Atempt to use Timings.IOWrite() before Timings.Begin(), this is not allowed");
+                return Begin();
             }
 
             ioWrite.Start(running.SafePeek().self);
