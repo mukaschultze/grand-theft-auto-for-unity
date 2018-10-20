@@ -23,7 +23,7 @@
 //        }
 
 //        public static void Load(string path, GtaVersion version, int maxObjects = int.MaxValue) {
-//            using(new Timing(path)) {
+//            using(Timing.Get(path)) {
 //#if UNITY_EDITOR
 //                UnityEditor.Lightmapping.bakedGI = false;
 //                UnityEditor.Lightmapping.realtimeGI = false;

@@ -137,8 +137,7 @@ namespace GrandTheftAuto.Editor {
             catch(Exception e) {
                 Log.Exception(e);
                 Debug.LogException(e);
-            }
-            else {
+            } else {
                 Log.Message("There's no active loader");
                 Debug.Log("There's no active loader");
             }
@@ -214,7 +213,7 @@ namespace GrandTheftAuto.Editor {
             if(string.IsNullOrEmpty(imgPath) || string.IsNullOrEmpty(saveDirectory))
                 return;
 
-            using(new Timing("Exporting Img"))
+            using(Timing.Get("Exporting Img"))
             using(new MemoryCounter())
             using(new AssetEditing())
             using(var progress = new ProgressBar("Exporting Img", 0, 32)) {
@@ -224,7 +223,7 @@ namespace GrandTheftAuto.Editor {
 
                 foreach(var entry in img)
                     try {
-                        using(new Timing("Writing File"))
+                        using(Timing.Get("Writing File"))
                         File.WriteAllBytes(Path.Combine(saveDirectory, entry.FileName), entry.GetData());
 
                         progress.Increment(entry.FileName);
@@ -276,7 +275,7 @@ namespace GrandTheftAuto.Editor {
             if(string.IsNullOrEmpty(txdPath) || string.IsNullOrEmpty(saveDirectory))
                 return;
 
-            using(new Timing("Exporting Txd"))
+            using(Timing.Get("Exporting Txd"))
             using(new MemoryCounter())
             using(new AssetEditing())
             using(var progress = new ProgressBar("Exporting Txd", 0)) {
@@ -286,7 +285,7 @@ namespace GrandTheftAuto.Editor {
 
                 foreach(var texture in txd)
                     try {
-                        using(new Timing("Asset writing"))
+                        using(Timing.Get("Asset writing"))
                         AssetDatabase.CreateAsset(texture, Path.Combine(saveDirectory, texture.Name + ".asset"));
 
                         progress.Increment(texture.Name);
@@ -304,7 +303,7 @@ namespace GrandTheftAuto.Editor {
         #region DFF
         [MenuItem(LOAD_DFF, false, LOAD_ORDER)]
         private static void LoadDff() {
-            using(new Timing("Loading DFFs into scene"))
+            using(Timing.Get("Loading DFFs into scene"))
             using(new MemoryCounter()) {
                 var itemDefinitions = new DefinitionCollection();
                 var modelCollection = new ModelCollection();
@@ -318,8 +317,7 @@ namespace GrandTheftAuto.Editor {
 
                         modelCollection.Add(dff);
                         itemDefinitions.Add(new ItemDefinition(dff.FileNameWithoutExtension));
-                    }
-                    else if(objPath.EndsWith(".txd", StringComparison.OrdinalIgnoreCase))
+                    } else if(objPath.EndsWith(".txd", StringComparison.OrdinalIgnoreCase))
                         textureCollection.Add(new TxdFile(objPath));
                 }
 

@@ -26,14 +26,13 @@ namespace GrandTheftAuto.Ipl {
 
         private IPLSection currentSection = IPLSection.End;
         private List<ItemPlacement> placements = new List<ItemPlacement>();
-        private readonly static Dictionary<GtaVersion, int> requiredTokens = new Dictionary<GtaVersion, int> {
-            { GtaVersion.III, 12 },
+        private readonly static Dictionary<GtaVersion, int> requiredTokens = new Dictionary<GtaVersion, int> { { GtaVersion.III, 12 },
             { GtaVersion.ViceCity, 13 },
             { GtaVersion.SanAndreas, 11 }
         };
 
         public IplFile(string path, GtaVersion version) {
-            using(new Timing("Loading IPL")) {
+            using(Timing.Get("Loading IPL")) {
                 FilePath = path;
                 Version = version;
                 Load();
@@ -60,8 +59,7 @@ namespace GrandTheftAuto.Ipl {
         private void ProcessNewSectionStart(string line) {
             try {
                 currentSection = (IPLSection)Enum.Parse(typeof(IPLSection), line, true);
-            }
-            catch {
+            } catch {
                 Log.Warning("Unknow IPL section {0} in \"{1}\"", line.ToUpper(), FilePath);
                 currentSection = IPLSection.Unknow;
             }
@@ -116,8 +114,7 @@ namespace GrandTheftAuto.Ipl {
                         return false;
                 }
 
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("Failed to parse IPL line at \"{0}\", line \"{1}\", section {2}: {3}", FilePath, line, currentSection, e);
                 return false;
             }

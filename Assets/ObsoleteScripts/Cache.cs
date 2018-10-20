@@ -20,7 +20,7 @@
 //        public List<ItemPlacement> Placements { get; private set; }
 
 //        public OldCache(ImgFile[] imgs, DataFile[] datas) {
-//            using(new Timing("Initializing")) {
+//            using(Timing.Get("Initializing")) {
 //                IPLs = new Dictionary<string, BinaryIpl>();
 //                ItemsIDs = new Dictionary<int, ItemDefinition>();
 //                ItemsNames = new Dictionary<string, ItemDefinition>();

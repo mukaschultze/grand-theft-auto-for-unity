@@ -26,7 +26,7 @@ namespace GrandTheftAuto.Dff {
             if(loadedMaterial)
                 return loadedMaterial;
 
-            using(new Timing("Creating Unity Material")) {
+            using(Timing.Get("Creating Unity Material")) {
                 loadedMaterial = Object.Instantiate(ResourcesHelper.BaseMaterial.Value);
                 loadedMaterial.name = string.Format("{0}/{1}", txdName, TextureName);
 
@@ -50,8 +50,7 @@ namespace GrandTheftAuto.Dff {
                             texture = txds[TextureName];
                         if(!string.IsNullOrEmpty(MaskName))
                             mask = txds[MaskName];
-                    }
-                    else {
+                    } else {
                         if(!string.IsNullOrEmpty(TextureName))
                             texture = txds[txdName, TextureName];
                         if(!string.IsNullOrEmpty(MaskName))

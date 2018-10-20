@@ -16,7 +16,7 @@ namespace GrandTheftAuto.Ipl {
         public BinaryIpl(string filePath) : this(new FileEntry(filePath)) { }
 
         public BinaryIpl(FileEntry file) {
-            using(new Timing("Loading Binary IPL")) {
+            using(Timing.Get("Loading Binary IPL")) {
                 var reader = file.Reader;
 
                 if(reader.ReadInt32() != BNRY)

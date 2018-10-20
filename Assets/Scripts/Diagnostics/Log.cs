@@ -142,8 +142,8 @@ namespace GrandTheftAuto.Diagnostics {
 
             var timing = (Timing)null;
 
-            if(Timing.Running)
-                timing = new Timing("Processing Logs");
+            // if(Timing.Running)
+            //     timing = Timing.Get("Processing Logs");
 
             try {
                 current.LogString = string.Format(message, args);

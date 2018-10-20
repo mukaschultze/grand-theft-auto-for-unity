@@ -20,7 +20,7 @@
 //        }
 
 //        public void AddRootFrame(string modelName, Frame frame) {
-//            using(new Timing("Adding frame"))
+//            using(Timing.Get("Adding frame"))
 //                try {
 //                    rootFrames.Add(modelName, frame);
 //                }
@@ -30,24 +30,24 @@
 //        }
 
 //        public void AddDff(DffFile dff) {
-//            using(new Timing("Adding Dff"))
+//            using(Timing.Get("Adding Dff"))
 //                AddRootFrame(dff.FileName, dff.RootFrame);
 //        }
 
 //        public void AddDff(DffFile[] dffs) {
-//            using(new Timing("Adding Dff"))
+//            using(Timing.Get("Adding Dff"))
 //                for(int i = 0; i < dffs.Length; i++)
 //                    AddDff(dffs[i]);
 //        }
 
 //        public void AddDff(List<DffFile> dffs) {
-//            using(new Timing("Adding Dff"))
+//            using(Timing.Get("Adding Dff"))
 //                for(int i = 0; i < dffs.Count; i++)
 //                    AddDff(dffs[i]);
 //        }
 
 //        public Frame GetRootFrame(string modelName) {
-//            using(new Timing("Retrieving Frame"))
+//            using(Timing.Get("Retrieving Frame"))
 //                try {
 //                    return rootFrames[modelName];
 //                }
@@ -58,7 +58,7 @@
 //        }
 
 //        public override void Load(BufferReader reader) {
-//            using(new Timing("Reading Cache")) {
+//            using(Timing.Get("Reading Cache")) {
 //                var modelCount = reader.ReadInt32();
 //                for(var i = 0; i < modelCount; i++)
 //                    AddRootFrame(reader.ReadString(), ReadFrame(reader));
@@ -66,7 +66,7 @@
 //        }
 
 //        public override void Save(BinaryWriter writer) {
-//            using(new Timing("Writing Cache")) {
+//            using(Timing.Get("Writing Cache")) {
 //                writer.Write(rootFrames.Count);
 //                foreach(var kvp in rootFrames) {
 //                    writer.Write(kvp.Key);
@@ -77,7 +77,7 @@
 
 //        public override void Create(GtaVersion version) {
 //            using(new TempWorkingFolder(Directories.GetPathFromVersion(version)))
-//            using(new Timing("Exporting frame cache"))
+//            using(Timing.Get("Exporting frame cache"))
 //            using(new GCPass())
 //                try {
 //                    var imgs = new List<ImgFile> { ImgFile.GetMainImg(version) };

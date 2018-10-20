@@ -20,7 +20,7 @@ namespace GrandTheftAuto.Img {
         private static readonly Dictionary<BufferReader, int> dependents = new Dictionary<BufferReader, int>();
 
         public FileEntry(string filePath) {
-            using(new Timing("Creating (from filepath)")) {
+            using(Timing.Get("Creating (from filepath)")) {
                 Offset = 0;
                 Size = (int)new FileInfo(filePath).Length;
                 FilePath = filePath;
@@ -31,30 +31,29 @@ namespace GrandTheftAuto.Img {
         }
 
         public FileEntry(FileEntry file, string virtualFileName, int offset, int size) {
-            using(new Timing("Creating (from parent)")) {
-                Size = size;
-                Offset = file.Offset + offset;
-                FilePath = file.FilePath;
-                FileName = virtualFileName;
-                reader = file.reader;
-                dependents[reader]++;
+                using(Timing.Get("Creating (from parent)")) {
+                    Size = size;
+                    Offset = file.Offset + offset;
+                    FilePath = file.FilePath;
+                    FileName = virtualFileName;
+                    reader = file.reader;
+                    dependents[reader]++;
+                }
             }
-        }
 
-        ~FileEntry() {
-            if(--dependents[reader] > 0)
-                return;
+            ~FileEntry() {
+                if(--dependents[reader] > 0)
+                    return;
 
-            try {
-                dependents.Remove(reader);
-                reader.Dispose();
-                Log.Message("Closed stream for file: {0}", FilePath);
+                try {
+                    dependents.Remove(reader);
+                    reader.Dispose();
+                    Log.Message("Closed stream for file: {0}", FilePath);
+                } catch { Log.Error("Failed to close stream for file: {0}", FilePath); }
             }
-            catch { Log.Error("Failed to close stream for file: {0}", FilePath); }
-        }
 
         public byte[] GetData() {
-            using(new Timing("Data gathering")) {
+            using(Timing.Get("Data gathering")) {
                 reader.Position = Offset;
                 return reader.ReadBytes(Size);
             }

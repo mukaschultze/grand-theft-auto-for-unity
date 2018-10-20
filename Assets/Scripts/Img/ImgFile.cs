@@ -42,7 +42,7 @@ namespace GrandTheftAuto.Img {
         }
 
         private void LoadEntries() {
-            using(new Timing("Loading Entries")) {
+            using(Timing.Get("Loading Entries")) {
                 switch(Version) {
                     case GtaVersion.III:
                     case GtaVersion.ViceCity:
@@ -79,8 +79,7 @@ namespace GrandTheftAuto.Img {
 
                     try {
                         entries.Add(name, new FileEntry(ArchiveFile, name, pos, length));
-                    }
-                    catch {
+                    } catch {
                         Log.Error("Duplicated entry name \"{0}\" in \"{1}\"", name, FilePath);
                     }
                 }

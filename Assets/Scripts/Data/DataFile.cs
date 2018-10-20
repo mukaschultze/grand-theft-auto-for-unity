@@ -62,7 +62,7 @@ namespace GrandTheftAuto.Data {
         protected override char EofChar { get { return '#'; } }
 
         public DataFile(string filePath, GtaVersion version) {
-            using(new Timing("Loading DAT")) {
+            using(Timing.Get("Loading DAT")) {
                 if(version == GtaVersion.Unknown)
                     throw new ArgumentException("Unsupported GTA version");
 
@@ -83,8 +83,7 @@ namespace GrandTheftAuto.Data {
 
                 line = split[1];
                 return keyword;
-            }
-            catch {
+            } catch {
                 Log.Error("Invalid line in dat file: {0}", line);
                 return Keyword.NONE;
             }

@@ -15,7 +15,7 @@ namespace GrandTheftAuto.Txd.Decoding {
         }
 
         public override UnityTexture DecodeTextureWithProcessor(BufferReader reader, int width, int height, RasterFormat rasterFormat) {
-            using(new Timing("Color Block Decoding")) {
+            using(Timing.Get("Color Block Decoding")) {
                 var texture = GetTexture2D(width, height, rasterFormat);
                 var pixelCount = width * height;
                 var colors = new Color32[pixelCount];
@@ -38,7 +38,7 @@ namespace GrandTheftAuto.Txd.Decoding {
         }
 
         public override UnityTexture DecodeTextureWithComputeShader(BufferReader reader, int width, int height, RasterFormat rasterFormat) {
-            using(new Timing("Color Block Decoding (Compute Shader)"))
+            using(Timing.Get("Color Block Decoding (Compute Shader)"))
             using(var buffer = new ComputeBuffer(width * height, 4)) {
                 var texture = GetRenderTexture(width, height, rasterFormat);
 

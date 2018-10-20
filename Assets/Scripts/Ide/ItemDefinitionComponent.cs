@@ -25,7 +25,7 @@ namespace GrandTheftAuto.Ide {
 
         public void RegisterDefinition(object definition) {
             try {
-                using(new Timing("Registering Definition Component")) {
+                using(Timing.Get("Registering Definition Component")) {
                     var definitionProps = definition.GetType().GetProperties();
 
                     properties = new Property[definitionProps.Length + 1];
@@ -37,14 +37,12 @@ namespace GrandTheftAuto.Ide {
 
                         ourProp.name = definitionProp.Name;
 
-                        try { ourProp.value = definitionProp.GetValue(definition, null).ToString(); }
-                        catch { ourProp.value = "Ignored"; }
+                        try { ourProp.value = definitionProp.GetValue(definition, null).ToString(); } catch { ourProp.value = "Ignored"; }
 
                         properties[i + 1] = ourProp;
                     }
                 }
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("Failed to register definition component: {0}", e);
             }
         }

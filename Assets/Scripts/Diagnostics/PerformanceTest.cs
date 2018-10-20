@@ -21,7 +21,7 @@ namespace GrandTheftAuto.Diagnostics {
         }
 
         public void Run() {
-            using(new Timing("Performance Test")) {
+            using(Timing.Get("Performance Test")) {
                 if(Loops < 1)
                     throw new ArgumentException("Need at least 1 loop");
                 if(Actions == null || Actions.Count < 1)
@@ -31,7 +31,7 @@ namespace GrandTheftAuto.Diagnostics {
                 var log = new StringBuilder();
 
                 foreach(var action in Actions)
-                    using(new Timing(action.Method.Name)) {
+                    using(Timing.Get(action.Method.Name)) {
                         stopwatch.Reset();
                         stopwatch.Start();
 

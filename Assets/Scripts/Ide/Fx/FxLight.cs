@@ -35,7 +35,7 @@ namespace GrandTheftAuto.Ide.Fx {
         //TODO: Implement Halo
         //TODO: Implement Flickering
         public Light GetLight(Transform parent) {
-            using(new Timing("Creating light")) {
+            using(Timing.Get("Creating light")) {
                 if(loadedLight)
                     return Object.Instantiate(loadedLight);
 

@@ -11,9 +11,9 @@ namespace GrandTheftAuto.Txd {
 
         public string FileName { get { return file.FileName; } }
         public string FileNameWithoutExtension { get { return file.FileNameWithoutExtension; } }
-        public short TextureCount { get { if(!loaded) Load(); return textureCount; } }
-        public Texture this[int index] { get { if(!loaded) Load(); return textures.Values.ElementAt(index); ; } }
-        public Texture this[string name] { get { if(!loaded) Load(); return textures[name]; } }
+        public short TextureCount { get { if(!loaded)Load(); return textureCount; } }
+        public Texture this[int index] { get { if(!loaded)Load(); return textures.Values.ElementAt(index);; } }
+        public Texture this[string name] { get { if(!loaded)Load(); return textures[name]; } }
 
         private bool ArchiveShouldBeIgnored { get { return FileNameWithoutExtension == "ISLANDLODCOMINDNT"; } }
 
@@ -28,7 +28,7 @@ namespace GrandTheftAuto.Txd {
         public TxdFile(FileEntry file) { this.file = file; }
 
         private void Load() {
-            using(new Timing("Loading TXD")) {
+            using(Timing.Get("Loading TXD")) {
                 loaded = true;
                 textures = new Dictionary<string, Texture>(StringComparer.OrdinalIgnoreCase);
 
@@ -40,8 +40,7 @@ namespace GrandTheftAuto.Txd {
                 textureCount = short.MaxValue;
                 var reader = file.Reader;
 
-                try { ParseSection(new SectionHeader(reader), reader); }
-                catch(Exception e) { Log.Error("Failed to parse TXD section, on \"\"", e); }
+                try { ParseSection(new SectionHeader(reader), reader); } catch(Exception e) { Log.Error("Failed to parse TXD section, on \"\"", e); }
 
                 if(processedTextures != textureCount)
                     Log.Warning("Found {0} textures, expected {1}, on \"{2}\"", processedTextures, textureCount, file.FileName);
@@ -63,14 +62,12 @@ namespace GrandTheftAuto.Txd {
                                 try {
                                     if(!string.IsNullOrEmpty(texture.Name))
                                         textures.Add(texture.Name, texture);
-                                }
-                                catch { Log.Error("Failed to add texture {0} to {1}", texture.Name, FileName); }
+                                } catch { Log.Error("Failed to add texture {0} to {1}", texture.Name, FileName); }
 
                                 try {
                                     if(!string.IsNullOrEmpty(texture.AlphaName))
                                         textures.Add(texture.AlphaName, texture);
-                                }
-                                catch { Log.Error("Failed to add texture alpha {0} to {1}", texture.AlphaName, FileName); }
+                                } catch { Log.Error("Failed to add texture alpha {0} to {1}", texture.AlphaName, FileName); }
 
                                 processedTextures++;
                                 break;
@@ -112,17 +109,13 @@ namespace GrandTheftAuto.Txd {
         IEnumerator<Texture> IEnumerable<Texture>.GetEnumerator() {
             if(!loaded)
                 Load();
-            return (from texture in textures
-                    where texture.Value.AlphaName != texture.Key
-                    select texture.Value).GetEnumerator();
+            return (from texture in textures where texture.Value.AlphaName != texture.Key select texture.Value).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
             if(!loaded)
                 Load();
-            return (from texture in textures
-                    where texture.Value.AlphaName != texture.Key
-                    select texture.Value).GetEnumerator();
+            return (from texture in textures where texture.Value.AlphaName != texture.Key select texture.Value).GetEnumerator();
         }
     }
 }

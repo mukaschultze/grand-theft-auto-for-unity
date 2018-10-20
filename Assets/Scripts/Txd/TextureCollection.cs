@@ -17,7 +17,7 @@ namespace GrandTheftAuto.Txd {
 
         public Texture this[string textureName] {
             get {
-                using(new Timing("Retrieving Texture")) {
+                using(Timing.Get("Retrieving Texture")) {
                     var names = textureName.Split('/');
 
                     switch(names.Length) {
@@ -45,7 +45,7 @@ namespace GrandTheftAuto.Txd {
 
         public Texture this[string txdName, string textureName] {
             get {
-                using(new Timing("Retrieving Texture")) {
+                using(Timing.Get("Retrieving Texture")) {
                     TxdFile txd;
                     Texture result;
 
@@ -53,12 +53,12 @@ namespace GrandTheftAuto.Txd {
                         if(txd.TryGetTexture(textureName, out result))
                             return result;
                         else if(texturesParents.TryGetValue(txd, out txd))
-                            if(txd.TryGetTexture(textureName, out result))
-                                return result;
-                            else
-                                Log.Warning("Texture \"{0}\" not found on \"{1}\" or any of its parents", textureName, txdName);
+                        if(txd.TryGetTexture(textureName, out result))
+                            return result;
                         else
-                            Log.Warning("Texture \"{0}\" not found on \"{1}\"", textureName, txdName);
+                            Log.Warning("Texture \"{0}\" not found on \"{1}\" or any of its parents", textureName, txdName);
+                    else
+                        Log.Warning("Texture \"{0}\" not found on \"{1}\"", textureName, txdName);
                     else
                         Log.Warning("Txd not found \"{0}\"", txdName);
 
@@ -72,7 +72,7 @@ namespace GrandTheftAuto.Txd {
         public TextureCollection(bool textureNameOnly) { TextureNameOnly = textureNameOnly; }
 
         public void Add(DataFile data) {
-            using(new Timing("Adding Textures (data)")) {
+            using(Timing.Get("Adding Textures (data)")) {
                 foreach(var txd in data.TXDs)
                     Add(txd);
                 foreach(var img in data.IMGs)
@@ -81,23 +81,20 @@ namespace GrandTheftAuto.Txd {
         }
 
         public void Add(ImgFile img) {
-            using(new Timing("Adding Textures (img)"))
-                foreach(var entry in img)
-                    if(entry.FileName.EndsWith(".txd", StringComparison.Ordinal))
-                        Add(new TxdFile(entry));
+            using(Timing.Get("Adding Textures (img)"))
+            foreach(var entry in img)
+                if(entry.FileName.EndsWith(".txd", StringComparison.Ordinal))
+                    Add(new TxdFile(entry));
         }
 
         public void Add(TxdFile txd) {
-            using(new Timing("Adding Textures (txd)")) {
-                try { txds.Add(txd.FileNameWithoutExtension, txd); }
-                catch { Log.Error("A Txd with the same name already exist in this collection: {0}", txd.FileName); };
+            using(Timing.Get("Adding Textures (txd)")) {
+                try { txds.Add(txd.FileNameWithoutExtension, txd); } catch { Log.Error("A Txd with the same name already exist in this collection: {0}", txd.FileName); };
 
                 if(TextureNameOnly)
                     foreach(var texture in txd) {
-                        try { textures.Add(texture.Name, texture); }
-                        catch { Log.Warning("A texture with the same name already exist in this collection: {0}", texture.FullName); }
-                        try { textures.Add(texture.AlphaName, texture); }
-                        catch { Log.Warning("A texture with the same alpha name already exist in this collection: {0}", texture.FullALphaName); }
+                        try { textures.Add(texture.Name, texture); } catch { Log.Warning("A texture with the same name already exist in this collection: {0}", texture.FullName); }
+                        try { textures.Add(texture.AlphaName, texture); } catch { Log.Warning("A texture with the same alpha name already exist in this collection: {0}", texture.FullALphaName); }
                     }
             }
         }
@@ -109,7 +106,7 @@ namespace GrandTheftAuto.Txd {
         }
 
         public void AddTextureParent(TextureParent textureParenting) {
-            using(new Timing("Resolving Texture Parent")) {
+            using(Timing.Get("Resolving Texture Parent")) {
                 TxdFile texture;
                 TxdFile parent;
 
@@ -118,8 +115,7 @@ namespace GrandTheftAuto.Txd {
 
                 if(hasTexture && hasParent)
                     try { texturesParents.Add(texture, parent); }
-                    catch { Log.Warning("Couldn't resolve \"{0}.txd\" parenting, tried to set \"{1}.txd\" as parent but \"{2}.txd\" is already registered", textureParenting.TextureName, textureParenting.ParentName, texturesParents[texture].FileNameWithoutExtension); }
-                else if(!hasTexture && !hasParent)
+                catch { Log.Warning("Couldn't resolve \"{0}.txd\" parenting, tried to set \"{1}.txd\" as parent but \"{2}.txd\" is already registered", textureParenting.TextureName, textureParenting.ParentName, texturesParents[texture].FileNameWithoutExtension); } else if(!hasTexture && !hasParent)
                     Log.Warning("Invalid texture parenting, texture and parent not found: \"{0}.txd\", parent \"{1}.txd\"", textureParenting.TextureName, textureParenting.ParentName);
                 else if(!hasTexture)
                     Log.Warning("Invalid texture parenting, texture not found: \"{0}.txd\"", textureParenting.TextureName);

@@ -21,7 +21,7 @@ namespace GrandTheftAuto.Dff {
         }
 
         public List<Material> Materials { get; private set; }
-        public Mesh Mesh { get { if(!loadedMesh) Load(); return loadedMesh; } }
+        public Mesh Mesh { get { if(!loadedMesh)Load(); return loadedMesh; } }
 
         private RenderwaveVersion version;
         private Mesh loadedMesh;
@@ -42,7 +42,7 @@ namespace GrandTheftAuto.Dff {
         }
 
         public void Load() {
-            using(new Timing("Loading Geometry")) {
+            using(Timing.Get("Loading Geometry")) {
                 var position = reader.Position;
                 reader.Position = offset;
 
@@ -85,15 +85,13 @@ namespace GrandTheftAuto.Dff {
                     if((flags | GeometrySectionFlags.HasUV2) == flags) {
                         uv = ReadVector2Array(vertexCount);
                         uv2 = ReadVector2Array(vertexCount);
-                    }
-                    else if((flags | GeometrySectionFlags.HasUV) == flags)
+                    } else if((flags | GeometrySectionFlags.HasUV) == flags)
                         uv = ReadVector2Array(vertexCount);
 
                     if(nativeOffset != 0) {
                         tris = ReadTrisFromNative(out subMeshCount);
                         reader.SkipStream(triCount * 8);
-                    }
-                    else
+                    } else
                         tris = ReadTris(triCount);
 
                     reader.SkipStream(16); //Bounding sphere
@@ -121,18 +119,16 @@ namespace GrandTheftAuto.Dff {
                     else
                         loadedMesh.normals = CalculateNormals(vertices, loadedMesh.triangles);
 
-#if UNITY_EDITOR
-                    using(new Timing("Optimizing mesh")) {
+                    #if UNITY_EDITOR
+                    using(Timing.Get("Optimizing mesh")) {
                         UnityEditor.MeshUtility.SetMeshCompression(loadedMesh, UnityEditor.ModelImporterMeshCompression.High);
                         UnityEditor.MeshUtility.Optimize(loadedMesh);
                     }
-#endif
+                    #endif
 
                     loadedMesh.RecalculateBounds();
                     loadedMesh.UploadMeshData(true);
-                }
-                catch(Exception e) { Log.Exception(e); }
-                finally { reader.Position = position; }
+                } catch(Exception e) { Log.Exception(e); } finally { reader.Position = position; }
             }
         }
 
@@ -180,13 +176,11 @@ namespace GrandTheftAuto.Dff {
                 }
 
                 return tris;
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Exception(e);
                 subMeshCount = 0;
                 return null;
-            }
-            finally {
+            } finally {
                 reader.Position = position;
             }
         }

@@ -32,7 +32,7 @@
 //        public List<ItemPlacement> Placements { get; private set; }
 
 //        public Cache(TxdFile[] txds, bool useFullTextureName = false) {
-//            using(new Timing("Initializing")) {
+//            using(Timing.Get("Initializing")) {
 //                this.useFullTextureName = useFullTextureName;
 //                this.txds = new Dictionary<string, Texture>();
 //                files = new Dictionary<string, FileProxy>();
@@ -49,7 +49,7 @@
 //        }
 
 //        public Cache(ImgFile[] imgs, DataFile[] datas, bool useFullTextureName = false) {
-//            using(new Timing("Initializing")) {
+//            using(Timing.Get("Initializing")) {
 //                this.useFullTextureName = useFullTextureName;
 //                files = new Dictionary<string, FileProxy>();
 //                Placements = new List<ItemPlacement>();

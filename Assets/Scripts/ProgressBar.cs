@@ -46,7 +46,7 @@ namespace GrandTheftAuto {
             if(Current % Step != 0)
                 return Canceled;
 
-            using(new Timing("Progress Bar")) {
+            using(Timing.Get("Progress Bar")) {
                 #if UNITY_EDITOR
                 var folder = (TempWorkingFolder)null;
 

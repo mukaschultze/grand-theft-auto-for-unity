@@ -45,9 +45,10 @@ namespace GrandTheftAuto.Editor {
         private string[] timingFiles;
         [SerializeField]
         private string[] timingNames;
-        private TimingGroup loadedFile;
+        private TimingSaved loadedFile;
         [SerializeField]
         private Vector2 scroll;
+
         private bool spaceOnHeader;
         private static PrefItem<Sorting> currentSorting = new PrefItem<Sorting>("GrandTheftAuto.Editor.TimingWindow.currentSorting", Sorting.TotalTime);
 
@@ -57,12 +58,12 @@ namespace GrandTheftAuto.Editor {
         }
 
         private void OnEnable() {
-            TimingGroup.OnNewTimingCreated += SetCurrentTimingGroup;
+            TimingSave.OnDump += SetCurrentTimingGroup;
             ReloadFiles();
         }
 
         private void OnDisable() {
-            TimingGroup.OnNewTimingCreated -= SetCurrentTimingGroup;
+            TimingSave.OnDump -= SetCurrentTimingGroup;
         }
 
         private void OnInspectorUpdate() {
@@ -70,63 +71,70 @@ namespace GrandTheftAuto.Editor {
             Repaint();
         }
 
+        private bool HasLoadedFile {
+            get {
+                return loadedFile.data != null;
+            }
+        }
+
         private void OnGUI() {
             DoToolbar();
             DoHeader();
 
-            if(!File.Exists(selectedFile) && loadedFile == null)
+            if(!File.Exists(selectedFile) && !HasLoadedFile)
                 return;
 
             try {
-                if(loadedFile == null)
-                    loadedFile = new TimingGroup(selectedFile);
+                if(!HasLoadedFile)
+                    loadedFile = TimingSave.Load(selectedFile);
+            } catch(Exception e) {
+                EditorGUILayout.HelpBox(e.ToString(), MessageType.Error, true);
             }
-            catch(Exception e) { EditorGUILayout.HelpBox(e.ToString(), MessageType.Error, true); }
 
             DoTimingSampleList();
             DoFooter();
         }
 
-        private void SetCurrentTimingGroup(TimingGroup group) {
+        private void SetCurrentTimingGroup(TimingSaved group) {
             loadedFile = group;
             selectedFile = "Last Timing";
         }
 
-        private static int Sort(TimingSample a, TimingSample b) {
+        private static int Sort(TimingData a, TimingData b) {
             switch(currentSorting.Value) {
                 case Sorting.Name:
-                    return string.Compare(a.Name, b.Name);
+                    return string.Compare(a.name, b.name);
 
                 case Sorting.Class:
-                    return string.Compare(a.StackClass, b.StackClass);
+                    return string.Compare(a.stackClass, b.stackClass);
 
                 case Sorting.TotalTime:
                 case Sorting.TotalPercent:
-                    return (int)(b.Duration.Ticks - a.Duration.Ticks);
+                    return (int)(b.ticksTotal - a.ticksTotal);
 
                 case Sorting.SelfTime:
                 case Sorting.SelfPercent:
-                    return (int)(b.Duration.Ticks / b.Calls - a.Duration.Ticks / a.Calls);
+                    return (int)(b.ticksSelf - a.ticksSelf);
 
                 case Sorting.Calls:
-                    return b.Calls - a.Calls;
+                    return b.calls - a.calls;
 
                 case Sorting.InverseName:
-                    return string.Compare(b.Name, a.Name);
+                    return string.Compare(b.name, a.name);
 
                 case Sorting.InverseClass:
-                    return string.Compare(b.StackClass, a.StackClass);
+                    return string.Compare(b.stackClass, a.stackClass);
 
                 case Sorting.InverseTotalTime:
                 case Sorting.InverseTotalPercent:
-                    return (int)(a.Duration.Ticks - b.Duration.Ticks);
+                    return (int)(a.ticksTotal - b.ticksTotal);
 
                 case Sorting.InverseSelfTime:
                 case Sorting.InverseSelfPercent:
-                    return (int)(a.Duration.Ticks / a.Calls - b.Duration.Ticks / b.Calls);
+                    return (int)(a.ticksSelf - b.ticksSelf);
 
                 case Sorting.InverseCalls:
-                    return a.Calls - b.Calls;
+                    return a.calls - b.calls;
 
                 default:
                     return 0;
@@ -134,13 +142,13 @@ namespace GrandTheftAuto.Editor {
         }
 
         private void ReloadFiles() {
-            timingFiles = Directory.GetFiles(Timing.TimingsSaveFolder, "*.timing");
+            timingFiles = Directory.GetFiles(TimingSave.TimingsFolder, "*.*");
             timingNames = new string[timingFiles.Length];
 
             for(var i = 0; i < timingFiles.Length; i++)
                 timingNames[i] = Path.GetFileNameWithoutExtension(timingFiles[i]);
 
-            if(!File.Exists(selectedFile) && loadedFile == null)
+            if(!File.Exists(selectedFile) && HasLoadedFile)
                 selectedFile = timingFiles.LastOrDefault();
         }
 
@@ -150,13 +158,13 @@ namespace GrandTheftAuto.Editor {
 
                 if(selectedIndex >= 0 && selectedIndex < timingFiles.Length) {
                     selectedFile = timingFiles[selectedIndex];
-                    loadedFile = null;
+                    loadedFile = new TimingSaved();
                 }
 
                 GUILayout.FlexibleSpace();
 
                 if(GUILayout.Button("Open Timings Folder", Styles.toolbarButton))
-                    EditorUtility.RevealInFinder(Timing.TimingsSaveFolder);
+                    EditorUtility.RevealInFinder(TimingSave.TimingsFolder);
 
                 GUILayout.Space(7f);
 
@@ -165,22 +173,20 @@ namespace GrandTheftAuto.Editor {
                     File.Delete(selectedFile);
                     File.Delete(selectedFile + ".meta");
                     selectedFile = timingFiles.LastOrDefault();
-                    loadedFile = null;
+                    loadedFile = new TimingSaved();
                 }
 
-                GUI.enabled = loadedFile != null;
+                GUI.enabled = HasLoadedFile;
                 if(GUILayout.Button("Save File", Styles.toolbarButton)) {
-                    var path = EditorUtility.SaveFilePanel("Save timing file", Timing.TimingsSaveFolder, "New Timing", "timing");
-                    if(!string.IsNullOrEmpty(path))
-                        loadedFile.Save(path);
+                    TimingSave.Dump(loadedFile.overheadTicks, loadedFile.data);
                 }
 
                 GUI.enabled = true;
                 if(GUILayout.Button("Load File", Styles.toolbarButton)) {
-                    var path = EditorUtility.OpenFilePanel("Select timing file", Timing.TimingsSaveFolder, "timing");
+                    var path = EditorUtility.OpenFilePanel("Select timing file", TimingSave.TimingsFolder, "*");
                     if(!string.IsNullOrEmpty(path)) {
                         selectedFile = path;
-                        loadedFile = null;
+                        loadedFile = new TimingSaved();
                     }
                 }
             }
@@ -212,10 +218,14 @@ namespace GrandTheftAuto.Editor {
             using(var scrollView = new EditorGUILayout.ScrollViewScope(scroll, false, false))
             using(var rect2 = new EditorGUILayout.VerticalScope()) {
                 scroll = scrollView.scrollPosition;
+
                 if(Event.current.type == EventType.Repaint)
                     spaceOnHeader = rect1.rect.height < rect2.rect.height;
 
-                var timings = loadedFile.Timings;
+                if(!HasLoadedFile)
+                    return;
+
+                var timings = loadedFile.data;
                 Array.Sort(timings, Sort);
 
                 for(var i = 0; i < timings.Length; i++)
@@ -235,27 +245,31 @@ namespace GrandTheftAuto.Editor {
             Styles.verticalLine.Draw(rect, GUIContent.none, 0);
         }
 
-        private void DoTimingSample(TimingSample sample, int index) {
+        private void DoTimingSample(TimingData sample, int index) {
             using(new EditorGUILayout.HorizontalScope((index & 1) == 1 ? Styles.backgroundOdd : Styles.backgroundEven, GUILayout.Height(TIMING_ITEM_HEIGHT))) {
-                EditorGUILayout.LabelField(sample.Name, GUILayout.ExpandWidth(true), GUILayout.MinWidth(150f));
+                EditorGUILayout.LabelField(sample.name, GUILayout.ExpandWidth(true), GUILayout.MinWidth(150f));
                 DrawLine();
-                EditorGUILayout.LabelField(sample.StackClass, GUILayout.ExpandWidth(false), GUILayout.Width(100f));
+                EditorGUILayout.LabelField(sample.stackClass, GUILayout.ExpandWidth(false), GUILayout.Width(100f));
                 DrawLine();
-                EditorGUILayout.LabelField(((float)sample.Duration.Ticks / loadedFile.TotalTime.Ticks).ToString("00.0%"), GUILayout.ExpandWidth(false), GUILayout.Width(50f));
+                EditorGUILayout.LabelField(((float)sample.ticksTotal / loadedFile.totalTicks).ToString("00.0%"), GUILayout.ExpandWidth(false), GUILayout.Width(50f));
                 DrawLine();
-                EditorGUILayout.LabelField(((float)sample.Duration.Ticks / sample.Calls / loadedFile.TotalTime.Ticks).ToString("00.0%"), GUILayout.ExpandWidth(false), GUILayout.Width(50f));
+                EditorGUILayout.LabelField(((float)sample.ticksSelf / loadedFile.totalTicks).ToString("00.0%"), GUILayout.ExpandWidth(false), GUILayout.Width(50f));
                 DrawLine();
-                EditorGUILayout.LabelField(sample.Duration.GetTimeFormated(), GUILayout.ExpandWidth(false), GUILayout.Width(80f));
+                EditorGUILayout.LabelField(new TimeSpan(sample.ticksTotal).GetTimeFormated(), GUILayout.ExpandWidth(false), GUILayout.Width(80f));
                 DrawLine();
-                EditorGUILayout.LabelField(new TimeSpan(sample.Duration.Ticks / sample.Calls).GetTimeFormated(), GUILayout.ExpandWidth(false), GUILayout.Width(80f));
+                EditorGUILayout.LabelField(new TimeSpan(sample.ticksSelf).GetTimeFormated(), GUILayout.ExpandWidth(false), GUILayout.Width(80f));
                 DrawLine();
-                EditorGUILayout.LabelField(sample.Calls.ToString("000000"), GUILayout.ExpandWidth(false), GUILayout.Width(60f));
+                EditorGUILayout.LabelField(sample.calls.ToString("000000"), GUILayout.ExpandWidth(false), GUILayout.Width(60f));
             }
         }
 
         private void DoFooter() {
+            var totalStr = new TimeSpan(loadedFile.totalTicks).GetTimeFormated();
+            var overheadStr = new TimeSpan(loadedFile.overheadTicks).GetTimeFormated();
+
             EditorGUILayout.HelpBox("Timings are just an average of performance, precision is not guaranteed.\nGC collect might interfere in the results.", MessageType.Warning);
-            EditorGUILayout.HelpBox(string.Format("Total Time: {0}\nOverhead Time: {1}", loadedFile.TotalTime.GetTimeFormated(), loadedFile.OverheadTime.GetTimeFormated()), MessageType.Info);
+            EditorGUILayout.HelpBox(string.Format("Total Time: {0}\nOverhead Time: {1}", totalStr, overheadStr), MessageType.Info);
         }
+
     }
 }

@@ -27,7 +27,7 @@
 //        }
 
 //        public void AddTexture(Texture texture) {
-//            using(new Timing("Adding texture")) {
+//            using(Timing.Get("Adding texture")) {
 //                try {
 //                    textures.Add(texture.FullName, texture);
 //                }
@@ -45,36 +45,36 @@
 //        }
 
 //        public void AddTexture(Texture[] textures) {
-//            using(new Timing("Adding texture"))
+//            using(Timing.Get("Adding texture"))
 //                for(int i = 0; i < textures.Length; i++)
 //                    AddTexture(textures[i]);
 //        }
 
 //        public void AddTexture(List<Texture> textures) {
-//            using(new Timing("Adding texture"))
+//            using(Timing.Get("Adding texture"))
 //                for(int i = 0; i < textures.Count; i++)
 //                    AddTexture(textures[i]);
 //        }
 
 //        public void AddTxd(TxdFile txd) {
-//            using(new Timing("Adding Txd"))
+//            using(Timing.Get("Adding Txd"))
 //                AddTexture(txd.Textures);
 //        }
 
 //        public void AddTxd(TxdFile[] txds) {
-//            using(new Timing("Adding Txd"))
+//            using(Timing.Get("Adding Txd"))
 //                for(int i = 0; i < txds.Length; i++)
 //                    AddTxd(txds[i]);
 //        }
 
 //        public void AddTxd(List<TxdFile> txds) {
-//            using(new Timing("Adding Txd"))
+//            using(Timing.Get("Adding Txd"))
 //                for(int i = 0; i < txds.Count; i++)
 //                    AddTxd(txds[i]);
 //        }
 
 //        public Texture GetTexture(string name) {
-//            using(new Timing("Retrieving Texture"))
+//            using(Timing.Get("Retrieving Texture"))
 //                try {
 //                    return textures[name];
 //                }
@@ -85,7 +85,7 @@
 //        }
 
 //        public Texture GetAlphaTexture(string name) {
-//            using(new Timing("Retrieving Texture"))
+//            using(Timing.Get("Retrieving Texture"))
 //                try {
 //                    return alphaTextures[name];
 //                }
@@ -96,7 +96,7 @@
 //        }
 
 //        public Texture2D GetTexture2D(string name) {
-//            using(new Timing("Retrieving Texture"))
+//            using(Timing.Get("Retrieving Texture"))
 //                try {
 //                    return textures[name].Texture2D;
 //                }
@@ -107,7 +107,7 @@
 //        }
 
 //        public Texture2D GetAlphaTexture2D(string name) {
-//            using(new Timing("Retrieving Texture"))
+//            using(Timing.Get("Retrieving Texture"))
 //                try {
 //                    return alphaTextures[name].Texture2D;
 //                }
@@ -118,7 +118,7 @@
 //        }
 
 //        public UnityMaterial GetMaterial(Material source, string txdName) {
-//            using(new Timing("Retrieving Material"))
+//            using(Timing.Get("Retrieving Material"))
 //                try {
 //                    return materials[source];
 //                }
@@ -128,7 +128,7 @@
 //        }
 
 //        private UnityMaterial CreateMaterial(Material source, string txdName) {
-//            using(new Timing("Creating Material")) {
+//            using(Timing.Get("Creating Material")) {
 //                var material = Object.Instantiate(baseMaterial);
 
 //                material.color = source.Color;
@@ -148,7 +148,7 @@
 //        }
 
 //        public override void Load(BufferReader reader) {
-//            using(new Timing("Reading Cache")) {
+//            using(Timing.Get("Reading Cache")) {
 //                var textureCount = reader.ReadInt32();
 
 //                for(int i = 0; i < textureCount; i++) {
@@ -175,7 +175,7 @@
 //        }
 
 //        public override void Save(BinaryWriter writer) {
-//            using(new Timing("Writing Cache")) {
+//            using(Timing.Get("Writing Cache")) {
 //                writer.Write(textures.Count);
 
 //                foreach(var texture in textures.Values) {
@@ -196,7 +196,7 @@
 
 //        public override void Create(GtaVersion version) {
 //            using(new TempWorkingFolder(Directories.GetPathFromVersion(version)))
-//            using(new Timing("Exporting texture cache"))
+//            using(Timing.Get("Exporting texture cache"))
 //            using(new GCPass())
 //                try {
 //                    var mainData = DataFile.GetMainData(version);

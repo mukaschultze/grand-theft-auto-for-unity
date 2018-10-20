@@ -16,7 +16,7 @@ namespace GrandTheftAuto.Txd.Decoding {
         }
 
         public override UnityTexture DecodeTextureWithProcessor(BufferReader reader, int width, int height, RasterFormat rasterFormat) {
-            using(new Timing("DXT1 Decoding")) {
+            using(Timing.Get("DXT1 Decoding")) {
                 uint r, g, b;
 
                 var texture = GetTexture2D(width, height, rasterFormat);
@@ -53,8 +53,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                         if((code & 0xFFFF) > ((code & 0xFFFF0000) >> 16)) {
                             c2 = SumColor(MultiplyColor(c0, 0.66666666f), MultiplyColor(c1, 0.33333333f));
                             c3 = SumColor(MultiplyColor(c0, 0.33333333f), MultiplyColor(c1, 0.66666666f));
-                        }
-                        else {
+                        } else {
                             c2 = SumColor(MultiplyColor(c0, 0.5f), MultiplyColor(c1, 0.5f));
                             c3 = black;
                         }
@@ -95,7 +94,7 @@ namespace GrandTheftAuto.Txd.Decoding {
         }
 
         public override UnityTexture DecodeTextureWithComputeShader(BufferReader reader, int width, int height, RasterFormat rasterFormat) {
-            using(new Timing("DXT1 Decoding (Compute Shader)"))
+            using(Timing.Get("DXT1 Decoding (Compute Shader)"))
             using(var buffer = new ComputeBuffer((width / 4) * (height / 4), 8)) {
                 var texture = GetRenderTexture(width, height, rasterFormat);
 

@@ -71,7 +71,7 @@ namespace GrandTheftAuto.Txd {
         }
 
         private void Load() {
-            using(new Timing("Loading Texture")) {
+            using(Timing.Get("Loading Texture")) {
                 var position = reader.Position;
                 reader.Position = offset;
 
@@ -111,12 +111,11 @@ namespace GrandTheftAuto.Txd {
                     // But if we don't do this it's problaby the application will run out of memory
                     // And fucking freeze the entire computer...
                     if(loadedTexture is Texture2D && Settings.Instance.compressTextures)
-                        using(new Timing("Compressing Texture")) {
+                        using(Timing.Get("Compressing Texture")) {
                             (loadedTexture as Texture2D).Compress(false);
                             (loadedTexture as Texture2D).Apply(false, true);
                         }
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Warning("Failed to load texture \"{0}\": {1}", FullName, e);
                     loadedTexture = missing;
                 } finally {

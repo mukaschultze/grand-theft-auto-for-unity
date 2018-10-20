@@ -18,7 +18,7 @@ namespace GrandTheftAuto.Ide {
         private IdeSection currentSection = IdeSection.END;
 
         public IdeFile(string filePath) {
-            using(new Timing("Loading IDE")) {
+            using(Timing.Get("Loading IDE")) {
                 FilePath = filePath;
                 Objects = new Dictionary<int, ItemDefinition>();
                 TextureParents = new List<TextureParent>();
@@ -81,8 +81,7 @@ namespace GrandTheftAuto.Ide {
                         TextureParents.Add(new TextureParent(tokens));
                         break;
                 }
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("Failed to parse IDE line at \"{0}\", line \"{1}\", section {2}: {3}", FilePath, line, currentSection, e);
             }
         }
@@ -96,8 +95,7 @@ namespace GrandTheftAuto.Ide {
                 if(Objects[effect.TargetObjectID].Effects == null)
                     Objects[effect.TargetObjectID].Effects = new List<FxDefinition>();
                 Objects[effect.TargetObjectID].Effects.Add(effect);
-            }
-            catch {
+            } catch {
                 Log.Error("Couldn't find target object ({0}) for 2DFX entry", effect.TargetObjectID);
             }
         }
@@ -108,8 +106,7 @@ namespace GrandTheftAuto.Ide {
                     currentSection = IdeSection._2DFX;
                 else
                     currentSection = (IdeSection)Enum.Parse(typeof(IdeSection), line, true);
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Warning("Unknow IDE section in \"{0}\", line \"{1}\": {2}", FilePath, line, e);
                 currentSection = IdeSection.Unknow;
             }

@@ -14,7 +14,7 @@ namespace GrandTheftAuto.Water {
         protected override char EofChar { get { return '*'; } }
 
         public WaterFile(string path) {
-            using(new Timing("Loading Water")) {
+            using(Timing.Get("Loading Water")) {
                 FilePath = path;
                 Version = GetVersion(path);
                 Log.Message("No version specified for {0}, loaded GTA {1}", path, Version);
@@ -24,7 +24,7 @@ namespace GrandTheftAuto.Water {
         }
 
         public WaterFile(string path, GtaVersion version) {
-            using(new Timing("Loading Water")) {
+            using(Timing.Get("Loading Water")) {
                 FilePath = path;
                 Version = version;
                 Planes = new List<WaterPlane>();
@@ -64,7 +64,7 @@ namespace GrandTheftAuto.Water {
 
                     break;
 
-                //http://gtaforums.com/topic/211733-sadoc-waterdat/
+                    //http://gtaforums.com/topic/211733-sadoc-waterdat/
                 case GtaVersion.SanAndreas:
                     toks = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 

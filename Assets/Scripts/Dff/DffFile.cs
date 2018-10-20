@@ -20,14 +20,13 @@ namespace GrandTheftAuto.Dff {
 
                 try {
                     return frames[rootFrameIndex];
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Error("Failed to get root frame on \"{0}\": {1}", FileName, e);
                     return new Frame() { Name = "Error" };
                 }
             }
         }
-        public Frame[] Frames { get { if(!loaded) Load(); return frames; } }
+        public Frame[] Frames { get { if(!loaded)Load(); return frames; } }
 
         private bool loaded;
         private bool isAlphaMaskString;
@@ -43,17 +42,15 @@ namespace GrandTheftAuto.Dff {
         public DffFile(FileEntry file) { this.file = file; }
 
         private void Load() {
-            using(new Timing("Loading DFF")) {
+            using(Timing.Get("Loading DFF")) {
                 try {
                     reader = file.Reader;
                     geometries = new List<Geometry>();
                     ProcessSection(new SectionHeader(reader));
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Warning("Error loading {0}", FileName);
                     Log.Exception(e);
-                }
-                finally {
+                } finally {
                     loaded = true;
                     geometries = null;
                     reader = null;
@@ -197,8 +194,7 @@ namespace GrandTheftAuto.Dff {
                 if(frameParentIndex != -1) {
                     frame.Parent = frames[frameParentIndex];
                     frame.Parent.Childs.Add(frame);
-                }
-                else if(rootFrameIndex == -1)
+                } else if(rootFrameIndex == -1)
                     rootFrameIndex = i;
                 else
                     Log.Error("More than one root frame in {0}", FileName);

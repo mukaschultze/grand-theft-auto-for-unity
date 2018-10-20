@@ -18,11 +18,11 @@ namespace GrandTheftAuto.Ide.Fx {
                 if(definition.Effects == null)
                     return;
 
-                using(new Timing("Creating Effects"))
-                    for(var i = 0; i < definition.Effects.Count; i++)
-                        //TODO: Implement other effects
-                        if(definition.Effects[i] is FxLight)
-                            (definition.Effects[i] as FxLight).GetLight(go.transform);
+                using(Timing.Get("Creating Effects"))
+                for(var i = 0; i < definition.Effects.Count; i++)
+                    //TODO: Implement other effects
+                    if(definition.Effects[i] is FxLight)
+                        (definition.Effects[i] as FxLight).GetLight(go.transform);
             };
         }
     }

@@ -43,8 +43,8 @@ namespace GrandTheftAuto.Ide {
 
         public GameObject GetObject(bool useLocalPosition) {
             if(loadedObj)
-                using(new Timing("Instantiating Object"))
-                    return Object.Instantiate(loadedObj);
+                using(Timing.Get("Instantiating Object"))
+            return Object.Instantiate(loadedObj);
 
             return loadedObj = CreateObject(useLocalPosition);
         }
@@ -53,27 +53,26 @@ namespace GrandTheftAuto.Ide {
             DffFile dff;
             GameObject go = null;
 
-            using(new Timing("Creating Object"))
-                try {
-                    if(!Loader.ModelCollection.TryGetValue(DffName, out dff)) {
-                        Log.Error("Dff {0} not found", DffName);
-                        return go = new GameObject("DFF NOT FOUND " + DffName);
-                    }
-
-                    go = CreateTransform(dff.RootFrame, null, TxdName, useLocalPosition).gameObject;
-                    go.AddComponent<ItemDefinitionComponent>().RegisterDefinition(this);
-
-                    GameObjectModifiers(go, dff, this);
-                    return go;
+            using(Timing.Get("Creating Object"))
+            try {
+                if(!Loader.ModelCollection.TryGetValue(DffName, out dff)) {
+                    Log.Error("Dff {0} not found", DffName);
+                    return go = new GameObject("DFF NOT FOUND " + DffName);
                 }
-                catch(Exception e) {
-                    Log.Error("Failed to create object {0} (ID {1}): {2}", DffName, ID, e);
-                    return go = new GameObject("ERROR " + DffName);
-                }
+
+                go = CreateTransform(dff.RootFrame, null, TxdName, useLocalPosition).gameObject;
+                go.AddComponent<ItemDefinitionComponent>().RegisterDefinition(this);
+
+                GameObjectModifiers(go, dff, this);
+                return go;
+            } catch(Exception e) {
+                Log.Error("Failed to create object {0} (ID {1}): {2}", DffName, ID, e);
+                return go = new GameObject("ERROR " + DffName);
+            }
         }
 
         private Transform CreateTransform(Frame frame, Transform parent, string txdName, bool useLocalPosition) {
-            using(new Timing("Creating Transform")) {
+            using(Timing.Get("Creating Transform")) {
                 if(frame == null) {
                     Log.Warning("Null frame on object \"{0}\"(ID {1})", DffName, ID);
                     return new GameObject("NULL FRAME " + DffName).transform;
@@ -102,7 +101,7 @@ namespace GrandTheftAuto.Ide {
         }
 
         private Renderer CreateRenderer(Frame frame, GameObject go, string txdName) {
-            using(new Timing("Creating Renderer")) {
+            using(Timing.Get("Creating Renderer")) {
                 var meshFilter = go.AddComponent<MeshFilter>();
                 var renderer = go.AddComponent<MeshRenderer>();
 

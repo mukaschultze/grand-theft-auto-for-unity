@@ -65,7 +65,7 @@ namespace GrandTheftAuto {
             }
 
         public void Load() {
-            using(new Timing("Loading " + Version.GetFormatedGTAName(true)))
+            using(Timing.Get("Loading " + Version.GetFormatedGTAName(true)))
             using(new TempCultureInfo(CultureInfo.InvariantCulture))
             using(new MemoryCounter())
             using(var workingFolder = new TempWorkingFolder(Path))
@@ -98,8 +98,7 @@ namespace GrandTheftAuto {
                     Camera.main.gameObject.AddComponent<FreeCamera>();
                 if(!Camera.main.GetComponent<CameraLod>())
                     Camera.main.gameObject.AddComponent<CameraLod>();
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("FAILED TO LOAD");
                 Log.Exception(e);
             } finally {
@@ -117,7 +116,7 @@ namespace GrandTheftAuto {
         }
 
         public GameObject Place(ItemPlacement placement, ProgressBar progress) {
-            using(new Timing("Placing"))
+            using(Timing.Get("Placing"))
             try {
                 progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
 
@@ -150,8 +149,7 @@ namespace GrandTheftAuto {
                     }
 
                 return obj;
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("Failed to place object \"{0}\" (ID {1}): {2}", placement.ItemName, placement.DefinitionID, e);
                 return null;
             }
