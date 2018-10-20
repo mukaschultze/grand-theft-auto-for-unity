@@ -22,18 +22,17 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var colors = new Color32[pixelCount];
                 var buffer = reader.ReadBytes(1024 + 4 + pixelCount); // 1024 bytes for palette, 4 bytes for data size
 
-                for(var x = 0; x < width; x++)
-                    for(var y = 0; y < height; y++) {
-                        var palIndex = buffer[1028 + x + width * y] * 4;
-                        var colorIndex = x + width * (height - y - 1); // Palette textures are iverted
+                ThreadUtility.For(width, height, (x, y) => {
+                    var palIndex = buffer[1028 + x + width * y] * 4;
+                    var colorIndex = x + width * (height - y - 1); // Palette textures are iverted
 
-                        colors[colorIndex] = new Color32() {
-                            r = buffer[palIndex + 0],
-                            g = buffer[palIndex + 1],
-                            b = buffer[palIndex + 2],
-                            a = buffer[palIndex + 3]
-                        };
+                    colors[colorIndex] = new Color32() {
+                        r = buffer[palIndex + 0],
+                        g = buffer[palIndex + 1],
+                        b = buffer[palIndex + 2],
+                        a = buffer[palIndex + 3]
                     };
+                });
 
                 texture.SetPixels32(colors);
                 texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
