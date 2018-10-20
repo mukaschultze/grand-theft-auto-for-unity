@@ -24,6 +24,7 @@ namespace GrandTheftAuto.Diagnostics {
         private static FastSample ioWrite = new FastSample();
         private static FastSample overhead = new FastSample();
 
+        private static bool isRunning;
         private static Stack<Timing> waiting = new Stack<Timing>(STACK_CAPACITY);
         private static Stack<Timing> running = new Stack<Timing>(STACK_CAPACITY);
         private static Dictionary<string, TimingSample> samples = new Dictionary<string, TimingSample>(DICTIONARY_CAPACITY);
@@ -45,6 +46,12 @@ namespace GrandTheftAuto.Diagnostics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Timing Get(string label) {
             using(Overhead()) {
+
+                if(isRunning) {
+                    Log.Warning("Atempt to usa Timings.Get() before Timings.Begin(), this is not allowed");
+                    return null;
+                }
+
                 var parent = running.SafePeek();
                 var timing = StackUtility.MoveStack(waiting, running);
 
@@ -95,6 +102,7 @@ namespace GrandTheftAuto.Diagnostics {
 
                     TimingsContainer.Dump(samples.Select(kvp => kvp.Value).ToArray(), fastSamples);
                     overhead.Reset();
+                    isRunning = false;
                 }
             }
         }
@@ -104,17 +112,30 @@ namespace GrandTheftAuto.Diagnostics {
             ioWrite.Reset();
             ioRead.Reset();
             overhead.Reset();
+            isRunning = true;
             return Get(label);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable IORead() {
+
+            if(isRunning) {
+                Log.Warning("Atempt to usa Timings.IORead() before Timings.Begin(), this is not allowed");
+                return null;
+            }
+
             ioRead.Start(running.SafePeek().self);
             return ioRead;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable IOWrite() {
+
+            if(isRunning) {
+                Log.Warning("Atempt to usa Timings.IOWrite() before Timings.Begin(), this is not allowed");
+                return null;
+            }
+
             ioWrite.Start(running.SafePeek().self);
             return ioWrite;
         }
