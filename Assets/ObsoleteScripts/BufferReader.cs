@@ -7,7 +7,11 @@ using GrandTheftAuto.Diagnostics;
 namespace GrandTheftAuto {
     public class BufferReader : IDisposable {
 
-        public Stream BaseStream { get { return reader.BaseStream; } }
+        public Stream BaseStream {
+            get {
+                return reader.BaseStream;
+            }
+        }
 
         public long Position {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,51 +59,61 @@ namespace GrandTheftAuto {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBoolean() {
+            using(Timing.IORead())
             return reader.ReadBoolean();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte() {
+            using(Timing.IORead())
             return reader.ReadByte();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] ReadBytes(int count) {
+            using(Timing.IORead())
             return reader.ReadBytes(count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public char ReadChar() {
+            using(Timing.IORead())
             return reader.ReadChar();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double ReadDouble() {
+            using(Timing.IORead())
             return reader.ReadDouble();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16() {
+            using(Timing.IORead())
             return reader.ReadInt16();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt32() {
+            using(Timing.IORead())
             return reader.ReadInt32();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadInt64() {
+            using(Timing.IORead())
             return reader.ReadInt64();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float ReadSingle() {
+            using(Timing.IORead())
             return reader.ReadSingle();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadString() {
+            using(Timing.IORead())
             return reader.ReadString();
         }
 
@@ -113,16 +127,19 @@ namespace GrandTheftAuto {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUInt16() {
+            using(Timing.IORead())
             return reader.ReadUInt16();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt32() {
+            using(Timing.IORead())
             return reader.ReadUInt32();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadUInt64() {
+            using(Timing.IORead())
             return reader.ReadUInt64();
         }
 
