@@ -8,9 +8,10 @@ namespace GrandTheftAuto.Diagnostics {
 
     [Serializable]
     public struct TimingsContainer {
+
         public long totalTicks;
-        public long overheadTicks;
         public TimingSample[] samples;
+        public TimingSample[] fastSamples;
 
         private static Action<TimingsContainer> m_onDump = (t) => { };
 
@@ -28,12 +29,21 @@ namespace GrandTheftAuto.Diagnostics {
             }
         }
 
-        public static void Dump(long overheadTicks, TimingSample[] samples) {
+        public static void Dump(TimingSample[] samples, TimingSample[] fastSamples) {
+
+            var totalTicks = samples.Max(t => t.ticksTotal);
+            var totalTimeSample = new TimingSample() {
+                calls = 1,
+                label = "Total time",
+                ticksTotal = totalTicks,
+                ticksSelf = totalTicks,
+                stackClass = "FAST"
+            };
 
             var toSave = new TimingsContainer() {
-                overheadTicks = overheadTicks,
-                totalTicks = samples.Max(t => t.ticksTotal),
-                samples = samples
+                totalTicks = totalTicks,
+                samples = samples,
+                fastSamples = fastSamples.Append(totalTimeSample).ToArray()
             };
 
             var path = GetNewFileName();

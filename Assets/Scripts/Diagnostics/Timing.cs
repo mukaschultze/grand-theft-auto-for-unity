@@ -1,170 +1,128 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using System.Diagnostics;
-// using System.IO;
-// using System.Linq;
-// using GrandTheftAuto.Shared;
-// using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
-// namespace GrandTheftAuto.Diagnostics {
+namespace GrandTheftAuto.Diagnostics {
 
-//     public struct TimingSample {
+    [Serializable]
+    public struct TimingSample {
+        public string label;
+        public string stackClass;
+        public int calls;
+        public long ticksSelf;
+        public long ticksTotal;
+    }
 
-//         private long durationTicks;
+    public class Timing : IDisposable {
 
-//         public int Calls { get; set; }
-//         public string Name { get; set; }
-//         public string StackClass { get; set; }
-//         public Stopwatch Stopwatch { get; set; }
-//         public TimeSpan Duration {
-//             get {
-//                 if(Stopwatch == null)
-//                     return new TimeSpan(durationTicks);
-//                 else
-//                     return Stopwatch.Elapsed;
-//             }
-//             set { durationTicks = value.Ticks; }
-//         }
+        private const int STACK_CAPACITY = 256;
+        private const int DICTIONARY_CAPACITY = 128;
 
-//     }
+        private static FastSample ioRead = new FastSample();
+        private static FastSample ioWrite = new FastSample();
+        private static FastSample overhead = new FastSample();
 
-//     public class TimingGroup {
+        private static Stack<Timing> waiting = new Stack<Timing>(STACK_CAPACITY);
+        private static Stack<Timing> running = new Stack<Timing>(STACK_CAPACITY);
+        private static Dictionary<string, TimingSample> samples = new Dictionary<string, TimingSample>(DICTIONARY_CAPACITY);
 
-//         public TimeSpan TotalTime { get; private set; }
-//         public TimeSpan OverheadTime { get; private set; }
-//         public TimingSample[] Timings { get; private set; }
-//         public static Action<TimingGroup> OnNewTimingCreated { get; set; }
+        private string label;
+        private Stopwatch self;
+        private Stopwatch total;
 
-//         public TimingGroup(TimingSample[] timings, Stopwatch overhead) {
-//             TotalTime = new TimeSpan();
-//             OverheadTime = overhead.Elapsed;
-//             Timings = timings;
+        static Timing() {
+            for(var i = 0; i < STACK_CAPACITY; i++)
+                waiting.Push(new Timing());
+        }
 
-//             foreach(var t in timings)
-//                 TotalTime = TotalTime.Add(t.Duration);
-//         }
+        private Timing() {
+            self = new Stopwatch();
+            total = new Stopwatch();
+        }
 
-//         public TimingGroup(string path) {
-//             using(var stream = new FileStream(path, FileMode.Open))
-//             using(var reader = new BinaryReader(stream)) {
-//                 TotalTime = new TimeSpan(reader.ReadInt64());
-//                 OverheadTime = new TimeSpan(reader.ReadInt64());
-//                 Timings = new TimingSample[reader.ReadInt32()];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Timing Get(string label) {
+            using(Overhead()) {
+                var parent = running.SafePeek();
+                var timing = StackUtility.MoveStack(waiting, running);
 
-//                 for(var i = 0; i < Timings.Length; i++) {
-//                     Timings[i].Name = reader.ReadString();
-//                     Timings[i].StackClass = reader.ReadString();
-//                     Timings[i].Calls = reader.ReadInt32();
-//                     Timings[i].Duration = new TimeSpan(reader.ReadInt64());
-//                 }
-//             }
-//         }
+                if(timing == null)
+                    Log.Error("Not enough timing samples ({0})", STACK_CAPACITY);
 
-//         public void Save(string path) {
-//             using(var stream = new FileStream(path, FileMode.Create))
-//             using(var writer = new BinaryWriter(stream)) {
-//                 writer.Write(TotalTime.Ticks);
-//                 writer.Write(OverheadTime.Ticks);
-//                 writer.Write(Timings.Length);
+                if(parent != null)
+                    parent.self.Stop();
 
-//                 for(var i = 0; i < Timings.Length; i++) {
-//                     writer.Write(Timings[i].Name);
-//                     writer.Write(Timings[i].StackClass);
-//                     writer.Write(Timings[i].Calls);
-//                     writer.Write(Timings[i].Duration.Ticks);
-//                 }
-//             }
-//         }
+                timing.label = label;
+                timing.self.Start();
+                timing.total.Start();
 
-//     }
+                return timing;
+            }
+        }
 
-//     public class Timing : IDisposable {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Dispose() {
+            using(Overhead()) {
+                var timing = StackUtility.MoveStack(running, waiting);
+                var parent = running.SafePeek();
 
-//         private Timing parent;
-//         private TimingSample info;
+                if(timing != this)
+                    Log.Error("Timings out of sync");
 
-//         private static Timing current;
-//         private static readonly Stopwatch overheadTime = new Stopwatch();
-//         private static readonly Dictionary<string, TimingSample> timings = new Dictionary<string, TimingSample>(25);
+                TimingSample data;
 
-//         public static bool Running { get { return current != null; } }
-//         public static string TimingsSaveFolder {
-//             get {
-//                 var folder = Settings.Instance.timingsPath;
-//                 if(!Directory.Exists(folder))
-//                     Directory.CreateDirectory(folder);
-//                 return folder;
-//             }
-//         }
+                samples.TryGetValue(label, out data);
+                data.label = label;
+                data.calls++;
+                data.ticksSelf += self.ElapsedTicks;
+                data.ticksTotal += total.ElapsedTicks;
+                data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
+                samples[label] = data;
 
-//         public Timing(string name) {
-//             overheadTime.Start();
+                self.Reset();
+                total.Reset();
 
-//             parent = current;
-//             current = this;
+                if(parent != null)
+                    parent.self.Start();
+                else {
+                    var fastSamples = new [] {
+                        overhead.ToTimingSample("Overhead"),
+                        ioWrite.ToTimingSample("IO Write"),
+                        ioRead.ToTimingSample("IO Read")
+                    };
 
-//             var stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
-//             var key = string.Format("{0}_{1}", name, stackClass);
+                    TimingsContainer.Dump(samples.Select(kvp => kvp.Value).ToArray(), fastSamples);
+                    overhead.Reset();
+                }
+            }
+        }
 
-//             if(!timings.TryGetValue(key, out info))
-//                 timings.Add(key, info = new TimingSample() {
-//                     Name = name,
-//                         StackClass = stackClass,
-//                         Stopwatch = new Stopwatch()
-//                 });
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Timing Begin(string label = "main") {
+            ioWrite.Reset();
+            ioRead.Reset();
+            overhead.Reset();
+            return Get(label);
+        }
 
-//             info.Calls++;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IDisposable IORead() {
+            ioRead.Start(running.SafePeek().self);
+            return ioRead;
+        }
 
-//             if(parent != null)
-//                 parent.info.Stopwatch.Stop();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IDisposable IOWrite() {
+            ioWrite.Start(running.SafePeek().self);
+            return ioWrite;
+        }
 
-//             info.Stopwatch.Start();
-//             timings[key] = info;
-//             overheadTime.Stop();
-//         }
+        private static FastSample Overhead() {
+            overhead.Start();
+            return overhead;
+        }
 
-//         public void Dispose() {
-//             overheadTime.Start();
-
-//             info.Stopwatch.Stop();
-//             current = parent;
-
-//             if(current != null)
-//                 current.info.Stopwatch.Start();
-//             else
-//                 EndAll();
-
-//             overheadTime.Stop();
-//         }
-
-//         private static void EndAll() {
-//             if(current != null) {
-//                 Log.Warning("There's a stopwatch running, make sure to dispose all the timers");
-//                 current = null;
-//             }
-
-//             var group = new TimingGroup(timings.Values.ToArray(), overheadTime);
-//             var path = GetUniqueTimingFileName();
-//             group.Save(path);
-
-//             if(TimingGroup.OnNewTimingCreated != null)
-//                 TimingGroup.OnNewTimingCreated(new TimingGroup(path));
-
-//             foreach(var timing in timings.Values) {
-//                 if(timing.Stopwatch.IsRunning)
-//                     Log.Warning("Stopwatch for \"{0}\" is still running, maybe you didn't disposed the timer?", timing);
-
-//                 timing.Stopwatch.Reset();
-//             }
-
-//             timings.Clear();
-//             overheadTime.Reset();
-//         }
-
-//         private static string GetUniqueTimingFileName() {
-//             return Path.Combine(TimingsSaveFolder, string.Format("Timing_{0:yyyy_MM_dd_HH_mm_ss}.timing", DateTime.Now));
-//         }
-
-//     }
-
-// }
+    }
+}

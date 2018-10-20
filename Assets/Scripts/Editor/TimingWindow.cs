@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using GrandTheftAuto.Diagnostics;
 using UnityEditor;
 using UnityEngine;
@@ -162,10 +163,10 @@ namespace GrandTheftAuto.Editor {
                     loadedContainer = new TimingsContainer();
                 }
 
-                GUI.enabled = HasLoadedContainer;
-                if(GUILayout.Button("Save File", Styles.toolbarButton)) {
-                    TimingsContainer.Dump(loadedContainer.overheadTicks, loadedContainer.samples);
-                }
+                // GUI.enabled = HasLoadedContainer;
+                // if(GUILayout.Button("Save File", Styles.toolbarButton)) {
+                //     TimingsContainer.Dump(loadedContainer.overheadTicks, loadedContainer.samples);
+                // }
 
                 GUI.enabled = true;
                 if(GUILayout.Button("Load File", Styles.toolbarButton)) {
@@ -251,11 +252,23 @@ namespace GrandTheftAuto.Editor {
         }
 
         private void DoFooter() {
-            var totalStr = new TimeSpan(loadedContainer.totalTicks).GetTimeFormated();
-            var overheadStr = new TimeSpan(loadedContainer.overheadTicks).GetTimeFormated();
+            var str = new StringBuilder(300);
+
+            if(!HasLoadedContainer)
+                return;
+
+            str.AppendLine();
+
+            foreach(var sample in loadedContainer.fastSamples) {
+                str.Append(sample.label);
+                str.Append(": ");
+                str.Append(new TimeSpan(sample.ticksSelf).GetTimeFormated());
+                str.AppendFormat(" (Called {0} times)", sample.calls);
+                str.AppendLine();
+            }
 
             EditorGUILayout.HelpBox("Timings are just an average of performance, precision is not guaranteed.\nGC collect might interfere in the results.", MessageType.Warning);
-            EditorGUILayout.HelpBox(string.Format("Total Time: {0}\nOverhead Time: {1}", totalStr, overheadStr), MessageType.Info);
+            EditorGUILayout.HelpBox(str.ToString(), MessageType.Info);
         }
 
     }
