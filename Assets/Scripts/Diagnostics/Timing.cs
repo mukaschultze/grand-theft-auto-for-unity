@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using GrandTheftAuto.Shared;
 
 namespace GrandTheftAuto.Diagnostics {
 
@@ -47,7 +48,7 @@ namespace GrandTheftAuto.Diagnostics {
         public static Timing Get(string label) {
             using(Overhead()) {
 
-                if(isRunning) {
+                if(!isRunning) {
                     Log.Warning("Atempt to usa Timings.Get() before Timings.Begin(), this is not allowed");
                     return null;
                 }
@@ -85,7 +86,12 @@ namespace GrandTheftAuto.Diagnostics {
                 data.calls++;
                 data.ticksSelf += self.ElapsedTicks;
                 data.ticksTotal += total.ElapsedTicks;
-                data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
+
+                if(Settings.Instance.stackTraceEnabled)
+                    data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
+                else
+                    data.stackClass = "¯\\_(ツ)_/¯";
+
                 samples[label] = data;
 
                 self.Reset();
@@ -119,7 +125,7 @@ namespace GrandTheftAuto.Diagnostics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable IORead() {
 
-            if(isRunning) {
+            if(!isRunning) {
                 Log.Warning("Atempt to usa Timings.IORead() before Timings.Begin(), this is not allowed");
                 return null;
             }
@@ -131,7 +137,7 @@ namespace GrandTheftAuto.Diagnostics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable IOWrite() {
 
-            if(isRunning) {
+            if(!isRunning) {
                 Log.Warning("Atempt to usa Timings.IOWrite() before Timings.Begin(), this is not allowed");
                 return null;
             }
@@ -140,6 +146,7 @@ namespace GrandTheftAuto.Diagnostics {
             return ioWrite;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static FastSample Overhead() {
             overhead.Start();
             return overhead;

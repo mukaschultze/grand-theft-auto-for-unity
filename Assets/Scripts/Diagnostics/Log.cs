@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using GrandTheftAuto.Shared;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -22,30 +23,57 @@ namespace GrandTheftAuto.Diagnostics {
         private LogType type;
 
         public string LogString {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return logString; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { logString = value; }
         }
         public string StackTrace {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return stackTrace; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { stackTrace = value; }
         }
         public LogType Type {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return type; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { type = value; }
         }
         public string FileName {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return fileName; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { fileName = value; }
         }
         public int LineNumber {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return lineNumber; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { lineNumber = value; }
         }
 
-        public static int MessagesCount { get; private set; }
-        public static int WarningsCount { get; private set; }
-        public static int ErrorsCount { get; private set; }
-        public static List<Log> AllLogs { get; set; }
+        public static int MessagesCount {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] private set;
+        }
+        public static int WarningsCount {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] private set;
+        }
+        public static int ErrorsCount {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] private set;
+        }
+        public static List<Log> AllLogs {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] set;
+        }
 
         public static string LogFilePath { get { return Settings.Instance.logFilePath; } }
         public static string PreviousLogPath { get { return LogFilePath + "_old"; } }
@@ -79,30 +107,37 @@ namespace GrandTheftAuto.Diagnostics {
             writer.WriteLine("=====================================\n");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Message(object message) {
             ProcessLog(LogType.Log, message.ToString());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Message(string format, params object[] args) {
             ProcessLog(LogType.Log, format, null, args);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Warning(object message) {
             ProcessLog(LogType.Warning, message.ToString());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Warning(string format, params object[] args) {
             ProcessLog(LogType.Warning, format, null, args);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Error(object message) {
             ProcessLog(LogType.Error, message.ToString());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Error(string format, params object[] args) {
             ProcessLog(LogType.Error, format, null, args);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Exception(Exception e) {
             ProcessLog(LogType.Exception, e.Message, e.StackTrace);
         }
@@ -123,6 +158,7 @@ namespace GrandTheftAuto.Diagnostics {
             Application.OpenURL(previous ? PreviousLogPath : LogFilePath);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ProcessLog(LogType type, string message, string exceptionStack = null, params object[] args) {
             switch(type) {
                 case LogType.Log:
@@ -149,7 +185,11 @@ namespace GrandTheftAuto.Diagnostics {
                 current.LogString = string.Format(message, args);
                 current.Type = type;
 
-                if(string.IsNullOrEmpty(exceptionStack)) {
+                if(!string.IsNullOrEmpty(exceptionStack)) {
+                    current.StackTrace = exceptionStack;
+                } else if(!Settings.Instance.stackTraceEnabled) {
+                    current.stackTrace = string.Empty;
+                } else {
                     var stack = new StackFrame(2, true);
 
                     if(!string.IsNullOrEmpty(stack.GetFileName())) {
@@ -157,8 +197,6 @@ namespace GrandTheftAuto.Diagnostics {
                         current.LineNumber = stack.GetFileLineNumber();
                         current.StackTrace = string.Format(" at {0}, line {1}", Path.GetFileName(current.FileName), current.LineNumber);
                     }
-                } else {
-                    current.StackTrace = exceptionStack;
                 }
 
                 AllLogs.Add(current);
@@ -171,6 +209,7 @@ namespace GrandTheftAuto.Diagnostics {
                 timing.Dispose();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() {
             if(!string.IsNullOrEmpty(StackTrace))
                 return string.Format("{0}{1}:\n{2}\n", Type, StackTrace, LogString);

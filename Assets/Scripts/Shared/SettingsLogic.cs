@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using GrandTheftAuto.Diagnostics;
 using UnityEngine;
 
@@ -20,11 +21,13 @@ namespace GrandTheftAuto.Shared {
         }
 
         public static Settings Instance {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get {
                 return LoadSettingsFile();
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Settings LoadSettingsFile() {
             using(Timing.IORead())
             if(File.Exists(SettingsFilePath) && m_readTime >= File.GetLastWriteTime(SettingsFilePath))
