@@ -90,7 +90,7 @@ namespace GrandTheftAuto.Diagnostics {
                 if(Settings.Instance.stackTraceEnabled)
                     data.stackClass = new StackFrame(1, false).GetMethod().ReflectedType.Name;
                 else
-                    data.stackClass = "¯\\_(ツ)_/¯";
+                    data.stackClass = string.Empty;
 
                 samples[label] = data;
 
