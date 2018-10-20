@@ -26,17 +26,18 @@ namespace GrandTheftAuto.Shared {
         }
 
         private static Settings LoadSettingsFile() {
-
+            using(Timing.IORead())
             if(File.Exists(SettingsFilePath) && m_readTime >= File.GetLastWriteTime(SettingsFilePath))
                 return m_settings;
 
             Log.Message("Reloading settings file");
 
             if(File.Exists(SettingsFilePath)) {
-                var json = File.ReadAllText(SettingsFilePath);
-                JsonUtility.FromJsonOverwrite(json, m_settings);
-            }
-            else
+                using(Timing.IORead()) {
+                    var json = File.ReadAllText(SettingsFilePath);
+                    JsonUtility.FromJsonOverwrite(json, m_settings);
+                }
+            } else
                 m_settings.SaveSettingsFile();
 
             m_readTime = DateTime.Now;
@@ -52,18 +53,19 @@ namespace GrandTheftAuto.Shared {
         }
 
         public void SaveSettingsFile() {
-            var json = JsonUtility.ToJson(this, true);
+            using(Timing.IOWrite()) {
+                var json = JsonUtility.ToJson(this, true);
 
-            if(!Directory.Exists(Path.GetDirectoryName(SettingsFilePath)))
-                Directory.CreateDirectory(Path.GetDirectoryName(SettingsFilePath));
+                if(!Directory.Exists(Path.GetDirectoryName(SettingsFilePath)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(SettingsFilePath));
 
-            if(File.Exists(SettingsFilePath))
-                File.Delete(SettingsFilePath);
+                if(File.Exists(SettingsFilePath))
+                    File.Delete(SettingsFilePath);
 
-            File.WriteAllText(SettingsFilePath, json);
-            m_readTime = File.GetLastWriteTime(SettingsFilePath);
-            Log.Message("Settings file saved");
-
+                File.WriteAllText(SettingsFilePath, json);
+                m_readTime = File.GetLastWriteTime(SettingsFilePath);
+                Log.Message("Settings file saved");
+            }
         }
 
     }

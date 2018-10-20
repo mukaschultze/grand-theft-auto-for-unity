@@ -15,6 +15,7 @@ namespace GrandTheftAuto.Shared {
         public bool gpuDecoding = false;
         public bool useMipmaps = false;
         public bool compressTextures = true;
+        public bool getStackTrace = true;
         public string logFilePath;
         public string timingsPath;
         public string fileBrowser;
