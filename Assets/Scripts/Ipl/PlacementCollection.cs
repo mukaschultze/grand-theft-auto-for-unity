@@ -20,17 +20,14 @@ namespace GrandTheftAuto.Ipl {
         public ItemPlacement[] NonLodPlacements { get; private set; }
 
         public void Add(DataFile data) {
-            using(Timing.Get("Adding Placements (data)"))
             for(var i = 0; i < data.IPLs.Count; i++)
                 Add(data.IPLs[i]);
         }
 
         public void Add(IplFile ipl) {
-            using(Timing.Get("Adding Placements (ipl)")) {
-                textIPLs.Add(Path.GetFileNameWithoutExtension(ipl.FilePath), ipl);
-                allPlacements.AddRange(ipl);
-                NonLodPlacements = AllPlacements;
-            }
+            textIPLs.Add(Path.GetFileNameWithoutExtension(ipl.FilePath), ipl);
+            allPlacements.AddRange(ipl);
+            NonLodPlacements = AllPlacements;
         }
 
         public void Add(ImgFile img) {
@@ -41,7 +38,6 @@ namespace GrandTheftAuto.Ipl {
 
             allPlacements = new List<ItemPlacement>();
 
-            using(Timing.Get("Adding Placements (streaming)"))
             foreach(var kvp in textIPLs) {
                 var textIplName = kvp.Key;
                 var placements = new List<ItemPlacement>(kvp.Value);

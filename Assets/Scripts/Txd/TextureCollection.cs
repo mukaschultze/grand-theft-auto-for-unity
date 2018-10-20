@@ -72,31 +72,26 @@ namespace GrandTheftAuto.Txd {
         public TextureCollection(bool textureNameOnly) { TextureNameOnly = textureNameOnly; }
 
         public void Add(DataFile data) {
-            using(Timing.Get("Adding Textures (data)")) {
-                foreach(var txd in data.TXDs)
-                    Add(txd);
-                foreach(var img in data.IMGs)
-                    Add(img);
-            }
+            foreach(var txd in data.TXDs)
+                Add(txd);
+            foreach(var img in data.IMGs)
+                Add(img);
         }
 
         public void Add(ImgFile img) {
-            using(Timing.Get("Adding Textures (img)"))
             foreach(var entry in img)
                 if(entry.FileName.EndsWith(".txd", StringComparison.Ordinal))
                     Add(new TxdFile(entry));
         }
 
         public void Add(TxdFile txd) {
-            using(Timing.Get("Adding Textures (txd)")) {
-                try { txds.Add(txd.FileNameWithoutExtension, txd); } catch { Log.Error("A Txd with the same name already exist in this collection: {0}", txd.FileName); };
+            try { txds.Add(txd.FileNameWithoutExtension, txd); } catch { Log.Error("A Txd with the same name already exist in this collection: {0}", txd.FileName); };
 
-                if(TextureNameOnly)
-                    foreach(var texture in txd) {
-                        try { textures.Add(texture.Name, texture); } catch { Log.Warning("A texture with the same name already exist in this collection: {0}", texture.FullName); }
-                        try { textures.Add(texture.AlphaName, texture); } catch { Log.Warning("A texture with the same alpha name already exist in this collection: {0}", texture.FullALphaName); }
-                    }
-            }
+            if(TextureNameOnly)
+                foreach(var texture in txd) {
+                    try { textures.Add(texture.Name, texture); } catch { Log.Warning("A texture with the same name already exist in this collection: {0}", texture.FullName); }
+                    try { textures.Add(texture.AlphaName, texture); } catch { Log.Warning("A texture with the same alpha name already exist in this collection: {0}", texture.FullALphaName); }
+                }
         }
 
         public void AddTextureParent(DataFile data) {

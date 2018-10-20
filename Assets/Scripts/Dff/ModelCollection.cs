@@ -13,23 +13,17 @@ namespace GrandTheftAuto.Dff {
         public DffFile this[string dffName] { get { return models[dffName]; } }
 
         public void Add(DataFile data) {
-            using(Timing.Get("Adding Models (data)")) {
-                //foreach(var dff in data.DFFs)
-                //    Add(dff);
-                foreach(var img in data.IMGs)
-                    Add(img);
-            }
+            foreach(var img in data.IMGs)
+                Add(img);
         }
 
         public void Add(ImgFile img) {
-            using(Timing.Get("Adding Models (img)"))
             foreach(var entry in img)
                 if(entry.FileName.EndsWith(".dff", StringComparison.OrdinalIgnoreCase))
                     Add(new DffFile(entry));
         }
 
         public void Add(DffFile dff) {
-            using(Timing.Get("Adding Models (dff)"))
             models.Add(dff.FileNameWithoutExtension, dff);
         }
 

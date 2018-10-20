@@ -13,22 +13,18 @@ namespace GrandTheftAuto.Ide {
         public ItemDefinition this[string ID] { get { return definitionsNames[ID]; } }
 
         public void Add(DataFile data) {
-            using(Timing.Get("Adding Definitions (data)"))
             foreach(var ide in data.IDEs)
                 Add(ide);
         }
 
         public void Add(IdeFile ide) {
-            using(Timing.Get("Adding Definitions (ide)"))
             foreach(var def in ide)
                 Add(def);
         }
 
         public void Add(ItemDefinition def) {
-            using(Timing.Get("Adding Definitions (definition)")) {
-                definitionsIDS.Add(def.ID, def);
-                definitionsNames.Add(def.DffName, def);
-            }
+            definitionsIDS.Add(def.ID, def);
+            definitionsNames.Add(def.DffName, def);
         }
 
         public IEnumerator<ItemDefinition> GetEnumerator() {
