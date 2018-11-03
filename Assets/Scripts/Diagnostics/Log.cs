@@ -75,7 +75,12 @@ namespace GrandTheftAuto.Diagnostics {
             [MethodImpl(MethodImplOptions.AggressiveInlining)] set;
         }
 
-        public static string LogFilePath { get { return Settings.Instance.logFilePath; } }
+        public static string LogFilePath {
+            get {
+                return "Logs.txt";
+                // Settings.Instance.logFilePath;
+            }
+        }
         public static string PreviousLogPath { get { return LogFilePath + "_old"; } }
 
         private static Log current = new Log();

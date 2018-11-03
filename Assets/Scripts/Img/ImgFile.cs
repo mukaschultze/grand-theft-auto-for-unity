@@ -51,7 +51,7 @@ namespace GrandTheftAuto.Img {
                         if(!File.Exists(dirPath))
                             throw new FileNotFoundException(string.Format("There should be a .dir file along the \"{0}\" file", ArchiveFile.FileName), ArchiveFile.FileName);
 
-                        reader = new BufferReader(new FileStream(dirPath, FileMode.Open));
+                        reader = new BufferReader(new FileStream(dirPath, FileMode.Open, FileAccess.Read, FileShare.Read));
                         entriesCount = (int)reader.Length / 32;
                         break;
 

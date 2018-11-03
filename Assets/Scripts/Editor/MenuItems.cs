@@ -12,44 +12,45 @@ using UnityEngine;
 using Decoder = GrandTheftAuto.Txd.Decoding.Decoder;
 
 namespace GrandTheftAuto.Editor {
-    internal static class MenuItems {
+    internal static unsafe class MenuItems {
 
         #region Testing
-        private const int TEST_COUNT = 1;
+        private const int TEST_COUNT = 1;//100000000;
         private const int TEST_ORDER = -10000;
         private const string TEST = "Grand Theft Auto/Performance Test";
 
+        static int csac = 15616;
+        static byte* ptr;
+        static IntPtr i;
+        static byte[] b;
+
         public static void Test1() {
-            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.III));
         }
 
         private static void Test2() {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            System.Threading.Thread.Sleep(1000);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
         private static void Test3() {
-            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.SanAndreas));
+
         }
 
         private static void Test4() {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            System.Threading.Thread.Sleep(1000);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+
         }
 
         private static void Test5() {
-            File.ReadAllBytes(ImgFile.GetMainImgPath(GtaVersion.ViceCity));
+            //b = new byte[] { *ptr++, *ptr++, *ptr++, *ptr++ };
+            //var c = BitConverter.ToInt32(b, 0);
         }
 
         [MenuItem(TEST, false, TEST_ORDER)]
         private static void Test() {
-            new PerformanceTest(TEST_COUNT, Test1, Test2, Test3, Test4, Test5, Test4).Run();
+            fixed (int* p = &csac) {
+                ptr = (byte*)p;
+                i = new IntPtr(ptr);
+                b = new byte[] { *ptr++, *ptr++, *ptr++, *ptr++ };
+            }
+            new PerformanceTest(TEST_COUNT, Test1, Test2, Test3, Test4, Test5).Run();
         }
         #endregion
 
@@ -134,10 +135,11 @@ namespace GrandTheftAuto.Editor {
                     Log.Message("Active loader disposed");
                     Debug.Log("Active loader disposed");
                 }
-            catch(Exception e) {
-                Log.Exception(e);
-                Debug.LogException(e);
-            } else {
+                catch(Exception e) {
+                    Log.Exception(e);
+                    Debug.LogException(e);
+                }
+            else {
                 Log.Message("There's no active loader");
                 Debug.Log("There's no active loader");
             }
@@ -161,7 +163,7 @@ namespace GrandTheftAuto.Editor {
         private static void LoadMap(GtaVersion version) {
             if(EditorUtility.DisplayDialog("Load " + version.GetFormatedGTAName() + " map", "Are you sure you want to load the entire map of " + version.GetFormatedGTAName(true) + "?", "Load", "Cancel"))
                 using(var loader = new Loader(version))
-            loader.Load();
+                    loader.Load();
         }
         #endregion
 
@@ -224,16 +226,16 @@ namespace GrandTheftAuto.Editor {
                 foreach(var entry in img)
                     try {
                         using(Timing.Get("Writing File"))
-                        File.WriteAllBytes(Path.Combine(saveDirectory, entry.FileName), entry.GetData());
+                            File.WriteAllBytes(Path.Combine(saveDirectory, entry.FileName), entry.GetData());
 
                         progress.Increment(entry.FileName);
 
                         if(progress.Canceled)
                             break;
                     }
-                catch {
-                    Log.Error("Failed to write: {0}", entry);
-                }
+                    catch {
+                        Log.Error("Failed to write: {0}", entry);
+                    }
             }
         }
         #endregion
@@ -286,16 +288,16 @@ namespace GrandTheftAuto.Editor {
                 foreach(var texture in txd)
                     try {
                         using(Timing.Get("Asset writing"))
-                        AssetDatabase.CreateAsset(texture, Path.Combine(saveDirectory, texture.Name + ".asset"));
+                            AssetDatabase.CreateAsset(texture, Path.Combine(saveDirectory, texture.Name + ".asset"));
 
                         progress.Increment(texture.Name);
 
                         if(progress.Canceled)
                             break;
                     }
-                catch(Exception e) {
-                    Log.Error("Failed to write texture: {0}", e);
-                }
+                    catch(Exception e) {
+                        Log.Error("Failed to write texture: {0}", e);
+                    }
             }
         }
         #endregion
@@ -317,13 +319,14 @@ namespace GrandTheftAuto.Editor {
 
                         modelCollection.Add(dff);
                         itemDefinitions.Add(new ItemDefinition(dff.FileNameWithoutExtension));
-                    } else if(objPath.EndsWith(".txd", StringComparison.OrdinalIgnoreCase))
+                    }
+                    else if(objPath.EndsWith(".txd", StringComparison.OrdinalIgnoreCase))
                         textureCollection.Add(new TxdFile(objPath));
                 }
 
                 using(new Loader(itemDefinitions, modelCollection, textureCollection))
-                foreach(var definition in itemDefinitions)
-                    definition.GetObject(true);
+                    foreach(var definition in itemDefinitions)
+                        definition.GetObject(true);
             }
         }
         #endregion
@@ -340,7 +343,7 @@ namespace GrandTheftAuto.Editor {
 
             for(var format = (TextureFormat)0; format < (TextureFormat)62; format++)
                 try { str.AppendFormat("Format {0}: {1}\n", format, SystemInfo.SupportsTextureFormat(format) ? "Supported" : "Unsupported"); }
-            catch { str.AppendFormat("Format {0}: Error\n", format); }
+                catch { str.AppendFormat("Format {0}: Error\n", format); }
 
             Log.Message(str);
         }
@@ -351,7 +354,7 @@ namespace GrandTheftAuto.Editor {
 
             for(var format = (RenderTextureFormat)0; format < (RenderTextureFormat)24; format++)
                 try { str.AppendFormat("Format {0}: {1}\n", format, SystemInfo.SupportsRenderTextureFormat(format) ? "Supported" : "Unsupported"); }
-            catch { str.AppendFormat("Format {0}: Error\n", format); }
+                catch { str.AppendFormat("Format {0}: Error\n", format); }
 
             Log.Message(str);
         }

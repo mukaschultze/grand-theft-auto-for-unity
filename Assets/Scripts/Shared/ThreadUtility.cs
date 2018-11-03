@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace GrandTheftAuto.Shared {
     public class ThreadUtility {
 
-        public static void ForLoop(int length, Action<int> body) {
+        public static void For(int length, Action<int> body) {
             if(body == null)
                 throw new ArgumentNullException("body");
 

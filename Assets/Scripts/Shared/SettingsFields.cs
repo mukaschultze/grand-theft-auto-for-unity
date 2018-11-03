@@ -21,10 +21,10 @@ namespace GrandTheftAuto.Shared {
         public string fileBrowser;
 
         public Settings() {
-            numberOfThreads = SystemInfo.processorCount;
+            //  numberOfThreads = SystemInfo.processorCount;
             logFilePath = Path.Combine("log.txt");
             timingsPath = Path.Combine("Timings", "timing_{0:yyyy_MM_dd_HH_mm_ss}.json");
-            fileBrowser = Path.Combine(Application.streamingAssetsPath, "FileBrowser", "FileBrowser.exe");
+            //   fileBrowser = Path.Combine(Application.streamingAssetsPath, "FileBrowser", "FileBrowser.exe");
         }
 
         public void OnBeforeSerialize() { }

@@ -22,7 +22,7 @@ namespace GrandTheftAuto.Diagnostics {
 
         public static string TimingsFolder {
             get {
-                var path = string.Format(Settings.Instance.timingsPath, DateTime.Now);
+                var path = string.Format("Timings/", DateTime.Now);
                 var folder = Path.GetDirectoryName(path);
 
                 return folder;
@@ -61,7 +61,7 @@ namespace GrandTheftAuto.Diagnostics {
         }
 
         private static string GetNewFileName() {
-            var path = string.Format(Settings.Instance.timingsPath, DateTime.Now);
+            var path = string.Format("Timings/", DateTime.Now);
             var folder = Path.GetDirectoryName(path);
 
             if(!string.IsNullOrEmpty(folder) && !Directory.Exists(Path.GetDirectoryName(path)))

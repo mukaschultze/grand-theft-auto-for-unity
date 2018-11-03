@@ -3,125 +3,107 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace GrandTheftAuto {
+namespace GrandTheftAuto.New {
     public unsafe class UnmanagedBuffer : IDisposable {
 
         private bool disposed;
-        private byte[] buffer;
-        private byte* dataPtr;
+        private byte * bufferPtr;
         private GCHandle pinnedBuffer;
 
-        public UnmanagedBuffer(byte[] data) {
-            buffer = data;
-            pinnedBuffer = GCHandle.Alloc(data, GCHandleType.Pinned);
-            dataPtr = (byte*)pinnedBuffer.AddrOfPinnedObject();
+        public byte[] buffer;
+
+        private Stream stream;
+        private int position;
+        private int remaining;
+        private int length;
+
+        public int StreamLength { get { return (int)stream.Length; } }
+
+        public UnmanagedBuffer(string filePath) {
+            var file = new FileEntry(filePath);
+            this.stream = file.GetReadStream();
         }
 
-        public UnmanagedBuffer(Stream stream) : this(stream, stream.Length) { }
+        public UnmanagedBuffer(FileEntry file) {
+            this.stream = file.GetReadStream();
+        }
 
-        public UnmanagedBuffer(Stream stream, long length) {
+        public UnmanagedBuffer(Stream stream) {
+            this.stream = stream;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CreateBuffer(int length) {
             buffer = new byte[length];
-            stream.Read(buffer, 0, (int)length);
             pinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            dataPtr = (byte*)pinnedBuffer.AddrOfPinnedObject();
-            buffer = null;
+            bufferPtr = (byte * )pinnedBuffer.AddrOfPinnedObject();
+
+            position = 0;
+            this.length = length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Skip(int count) {
-            dataPtr += count;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe byte ReadByte() {
-            dataPtr += sizeof(byte);
-            return *(dataPtr - sizeof(byte));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe char ReadChar() {
-            dataPtr += sizeof(char);
-            return (char)*(dataPtr - sizeof(char));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe double ReadDouble() {
-            dataPtr += sizeof(double);
-            return *(dataPtr - sizeof(double));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe short ReadInt16() {
-            dataPtr += sizeof(short);
-            return *(dataPtr - sizeof(short));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe int ReadInt32() {
-            dataPtr += sizeof(int);
-            return *(dataPtr - sizeof(int));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe long ReadInt64() {
-            dataPtr += sizeof(long);
-            return *(dataPtr - sizeof(long));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe float ReadSingle() {
-            dataPtr += sizeof(float);
-            return *(dataPtr - sizeof(float));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe string ReadString() {
-            var str = new string((char*)dataPtr);
-            dataPtr += str.Length + 1;
-            return str;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe string ReadString(int length) {
-            var str = new string((char*)dataPtr, 0, length);
-            dataPtr += length;
-            return str;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe ushort ReadUInt16() {
-            dataPtr += sizeof(ushort);
-            return *(dataPtr - sizeof(ushort));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe uint ReadUInt32() {
-            dataPtr += sizeof(uint);
-            return *(dataPtr - sizeof(uint));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe ulong ReadUInt64() {
-            dataPtr += sizeof(ulong);
-            return *(dataPtr - sizeof(ulong));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe T ReadStruct<T>() {
-            var s = Marshal.PtrToStructure<T>((IntPtr)dataPtr);
-            dataPtr += Marshal.SizeOf<T>();
-            return s;
-        }
-
-        public void Dispose() {
-            if(!disposed && pinnedBuffer.IsAllocated)
+        private void FreeBuffer() {
+            if(pinnedBuffer.IsAllocated)
                 pinnedBuffer.Free();
 
             buffer = null;
-            disposed = true;
         }
 
-        ~UnmanagedBuffer() { Dispose(); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Reader GetReader(int length) {
+            if(length > this.length) {
+                FreeBuffer();
+                CreateBuffer(length);
+                ReadFromStream(length);
+            }
+
+            return new Reader(bufferPtr, length);
+        }
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void PrewarmBuffer(int count) {
+        //     EnsureLoaded(count);
+        // }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReadFromStream(int count) {
+            remaining = count;
+            stream.Read(buffer, position, count);
+        }
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void EnsureLoaded(int count) {
+        //     if(length == 0) { // We don't have a buffer yet
+        //         CreateBuffer(Math.Max(count, DEFAULT_BUFFER_SIZE));
+        //         ReadFromStream(length);
+        //     }
+
+        //     if(remaining >= count) { return; } // Ok, we do have enought bytes loaded, nothing to do
+
+        //     var needed = count - remaining;
+
+        //     if(count > length) { // Our buffer isn't big enought to support the incoming data
+        //         FreeBuffer();
+        //         CreateBuffer(count); // Create a new buffer with enought space
+        //         ReadFromStream(count);
+        //     } else if(position + needed >= length) { // There's no space available in the buffer
+        //         position = 0; // Go back to the beggining
+        //         ReadFromStream(count);
+        //     } else { // We have enought space, only load the needed bytes
+        //         ReadFromStream(needed);
+        //     }
+
+        // }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Dispose() {
+                FreeBuffer();
+                stream.Dispose();
+                disposed = true;
+            }
+
+            ~UnmanagedBuffer() { Dispose(); }
 
     }
 }
