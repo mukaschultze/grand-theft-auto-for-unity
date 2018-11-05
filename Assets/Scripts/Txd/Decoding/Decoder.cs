@@ -1,4 +1,5 @@
-﻿using GrandTheftAuto.Diagnostics;
+﻿using System.Runtime.CompilerServices;
+using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
@@ -47,6 +48,8 @@ namespace GrandTheftAuto.Txd.Decoding {
         protected static TextureFormat GetFormat(RasterFormat format) {
             var result = TextureFormat.RGBA32;
 
+            return result;
+
             switch(format) {
                 case RasterFormat.Format_555:
                 case RasterFormat.Format_565:
@@ -84,6 +87,8 @@ namespace GrandTheftAuto.Txd.Decoding {
         protected static RenderTextureFormat GetRenderTextureFormat(RasterFormat format) {
             var result = RenderTextureFormat.Default;
 
+            return result;
+
             switch(format) {
                 case RasterFormat.Format_555:
                 case RasterFormat.Format_565:
@@ -118,6 +123,7 @@ namespace GrandTheftAuto.Txd.Decoding {
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Color32 SumColor(Color32 left, Color32 right) {
             left.r += right.r;
             left.g += right.g;
@@ -126,6 +132,7 @@ namespace GrandTheftAuto.Txd.Decoding {
             return left;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Color32 SubtractColor(Color32 left, Color32 right) {
             left.r -= right.r;
             left.g -= right.g;
@@ -134,6 +141,7 @@ namespace GrandTheftAuto.Txd.Decoding {
             return left;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Color32 MultiplyColor(Color32 right, float left) {
             right.r = (byte)(right.r * left);
             right.g = (byte)(right.g * left);

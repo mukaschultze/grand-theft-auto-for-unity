@@ -49,7 +49,7 @@ namespace GrandTheftAuto.Diagnostics {
             var path = GetNewFileName();
             var json = JsonUtility.ToJson(toSave, true);
 
-            File.WriteAllText(path, json);
+            // File.WriteAllText(path, json);
             OnDump(toSave);
         }
 
