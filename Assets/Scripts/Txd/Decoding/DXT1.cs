@@ -8,7 +8,7 @@ namespace GrandTheftAuto.Txd.Decoding {
     public class DXT1 : Decoder {
 
         public DXT1() {
-            if(SystemInfo.supportsComputeShaders) {
+            if (SystemInfo.supportsComputeShaders) {
                 shader = ResourcesHelper.DXT1Decoder.Value;
                 kernel = shader.FindKernel("Decode");
                 shader.GetKernelThreadGroupSizes(kernel, out threadsX, out threadsY, out threadsZ);
@@ -29,8 +29,8 @@ namespace GrandTheftAuto.Txd.Decoding {
 
                 reader.PrewarmBuffer((width / 4) * (height / 4) * 8);
 
-                for(var y = 0; y < height; y += 4)
-                    for(var x = 0; x < width; x += 4) {
+                for (var y = 0; y < height; y += 4)
+                    for (var x = 0; x < width; x += 4) {
                         var code = reader.ReadUInt32();
                         var indices = reader.ReadUInt32();
 
@@ -50,18 +50,17 @@ namespace GrandTheftAuto.Txd.Decoding {
                         c1.g = (byte)(g << 2 | g >> 3);
                         c1.b = (byte)(b << 3 | r >> 2);
 
-                        if((code & 0xFFFF) > ((code & 0xFFFF0000) >> 16)) {
+                        if ((code & 0xFFFF) > ((code & 0xFFFF0000) >> 16)) {
                             c2 = SumColor(MultiplyColor(c0, 0.66666666f), MultiplyColor(c1, 0.33333333f));
                             c3 = SumColor(MultiplyColor(c0, 0.33333333f), MultiplyColor(c1, 0.66666666f));
-                        }
-                        else {
+                        } else {
                             c2 = SumColor(MultiplyColor(c0, 0.5f), MultiplyColor(c1, 0.5f));
                             c3 = black;
                         }
 
-                        for(var yy = 0; yy < 4; yy++)
-                            for(var xx = 0; xx < 4; xx++) {
-                                switch(indices % 4) {
+                        for (var yy = 0; yy < 4; yy++)
+                            for (var xx = 0; xx < 4; xx++) {
+                                switch (indices % 4) {
                                     case 0:
                                         black = c0;
                                         break;
@@ -88,7 +87,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                     }
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
+                texture.Apply(UseMipmaps, false);
 
                 return texture;
             }
@@ -107,7 +106,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                 shader.SetBuffer(kernel, "Chunks", buffer);
                 shader.Dispatch(kernel, width / (int)threadsX / 4, height / (int)threadsY / 4, (int)threadsZ);
 
-                if(UseMipmaps)
+                if (UseMipmaps)
                     texture.GenerateMips();
 
                 return texture;

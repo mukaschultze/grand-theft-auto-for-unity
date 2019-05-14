@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Dff;
@@ -26,7 +27,7 @@ namespace GrandTheftAuto {
         public static ModelCollection ModelCollection { get; private set; }
 
         public Loader(GtaVersion version) {
-            if(Current != null)
+            if (Current != null)
                 throw new Exception("Another loader already in progress, make sure only one loader run at a time");
 
             Current = this;
@@ -34,40 +35,41 @@ namespace GrandTheftAuto {
         }
 
         public Loader(string path) {
-            if(Current != null)
+            if (Current != null)
                 throw new Exception("Another loader already in progress, make sure only one loader run at a time");
 
             Current = this;
             Version = Directories.GetVersionFromPath(Path = path);
 
-            if(Version == GtaVersion.Unknown)
+            if (Version == GtaVersion.Unknown)
                 throw new ArgumentException("Invalid Gta path: " + path);
 
             Log.Message("No version specified, loaded {0} for {1}", Version, path);
         }
 
         public Loader(DefinitionCollection itemDefinitions, ModelCollection modelCollection, TextureCollection textureCollection) {
-                if(Current != null)
-                    throw new Exception("Another loader already in progress, make sure only one loader run at a time");
+            if (Current != null)
+                throw new Exception("Another loader already in progress, make sure only one loader run at a time");
 
-                Current = this;
-                IdeCollection = itemDefinitions;
-                ModelCollection = modelCollection;
-                TxdCollection = textureCollection;
-            }
+            Current = this;
+            IdeCollection = itemDefinitions;
+            ModelCollection = modelCollection;
+            TxdCollection = textureCollection;
+        }
 
-            ~Loader() {
-                if(Current == null)
-                    return;
+        ~Loader() {
+            if (Current == null)
+                return;
 
-                Dispose();
-                Log.Warning("Loader not disposed, make sure to dispose it when the loading is over");
-            }
+            Dispose();
+            Log.Warning("Loader not disposed, make sure to dispose it when the loading is over");
+        }
 
         public void Load() {
             using(new Timing("Loading " + Version.GetFormatedGTAName(true)))
             using(new TempCultureInfo(CultureInfo.InvariantCulture))
             using(new MemoryCounter())
+            using(new AssetEditing())
             using(var workingFolder = new TempWorkingFolder(Path))
             using(var progress = new ProgressBar("Loading " + Version.GetFormatedGTAName() + " map", 0, workingFolder, 32))
             try {
@@ -87,19 +89,60 @@ namespace GrandTheftAuto {
                 //ItemDefinition.TransformModifiers += SetStatic;
                 progress.Count = IplCollection.AllPlacements.Count();
 
-                foreach(var placement in IplCollection) {
-                    Place(placement, progress);
+                using(workingFolder.Restore()) {
+                    Directory.CreateDirectory("Assets/Dump/Materials");
+                    Directory.CreateDirectory("Assets/Dump/Meshes");
+                    Directory.CreateDirectory("Assets/Dump/Textures");
+                }
 
-                    if(progress.Canceled)
+                foreach (var placement in IplCollection) {
+                    using(workingFolder.Restore()) {
+
+                        var obj = Place(placement, progress);
+
+                        var mats = obj
+                            .GetComponentsInChildren<Renderer>()
+                            .SelectMany(r => r.sharedMaterials);
+
+                        var meshes = obj
+                            .GetComponentsInChildren<MeshFilter>()
+                            .Select(r => r.sharedMesh);
+
+                        foreach (var mat in mats) {
+                            var texture = mat.mainTexture as Texture2D;
+                            var fileName = "Assets/Dump/Textures/" + texture.name + ".asset";
+                            var fileNamePng = "Assets/Dump/Textures/" + texture.name + ".png";
+                            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fileName));
+                            if (!File.Exists(fileName)) {
+                                UnityEditor.AssetDatabase.CreateAsset(texture, fileName);
+                                File.WriteAllBytes(fileNamePng, texture.EncodeToPNG());
+                            }
+                        }
+
+                        foreach (var mat in mats) {
+                            var fileName = "Assets/Dump/Materials/" + mat.name + ".mat";
+                            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fileName));
+                            if (!File.Exists(fileName))
+                                UnityEditor.AssetDatabase.CreateAsset(mat, fileName);
+                        }
+
+                        foreach (var mesh in meshes) {
+                            var fileName = "Assets/Dump/Meshes/" + mesh.name + ".mesh";
+                            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fileName));
+                            if (!File.Exists(fileName))
+                                UnityEditor.AssetDatabase.CreateAsset(mesh, fileName);
+                        }
+                    }
+
+                    if (progress.Canceled)
                         return;
                 }
 
-                if(!Camera.main.GetComponent<FreeCamera>())
+                if (!Camera.main.GetComponent<FreeCamera>())
                     Camera.main.gameObject.AddComponent<FreeCamera>();
-                if(!Camera.main.GetComponent<CameraLod>())
+                if (!Camera.main.GetComponent<CameraLod>())
                     Camera.main.gameObject.AddComponent<CameraLod>();
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 Log.Error("FAILED TO LOAD");
                 Log.Exception(e);
             } finally {
@@ -128,8 +171,8 @@ namespace GrandTheftAuto {
                 obj.transform.rotation = placement.Rotation;
                 //obj.transform.localScale = plac.Scale; Unnecessary?
 
-                if(IplCollection.GetLodVersion(placement, out placement))
-                    if(!obj.GetComponent<LODGroup>()) {
+                if (IplCollection.GetLodVersion(placement, out placement))
+                    if (!obj.GetComponent<LODGroup>()) {
                         var lodObj = Place(placement, progress);
                         var lodGroupGO = new GameObject(obj.name + " (LOD Group)");
                         var lodGroup = lodGroupGO.AddComponent<LODGroup>();
@@ -138,9 +181,9 @@ namespace GrandTheftAuto {
                         lodObj.transform.SetParent(lodGroupGO.transform);
                         lodGroupGO.layer = Layer.LODGroup;
 
-                        foreach(var child in obj.GetComponentsInChildren<Transform>())
+                        foreach (var child in obj.GetComponentsInChildren<Transform>())
                             child.gameObject.layer = Layer.LODGroup;
-                        foreach(var child in lodObj.GetComponentsInChildren<Transform>())
+                        foreach (var child in lodObj.GetComponentsInChildren<Transform>())
                             child.gameObject.layer = Layer.LODGroup;
 
                         lodGroup.SetLODs(new LOD[] {
@@ -150,8 +193,7 @@ namespace GrandTheftAuto {
                     }
 
                 return obj;
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 Log.Error("Failed to place object \"{0}\" (ID {1}): {2}", placement.ItemName, placement.DefinitionID, e);
                 return null;
             }

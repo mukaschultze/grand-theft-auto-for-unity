@@ -7,7 +7,7 @@ namespace GrandTheftAuto.Txd.Decoding {
     public class Palette : Decoder {
 
         public Palette() {
-            if(SystemInfo.supportsComputeShaders) {
+            if (SystemInfo.supportsComputeShaders) {
                 shader = ResourcesHelper.ColorPaletteDecoder.Value;
                 kernel = shader.FindKernel("Decode");
                 shader.GetKernelThreadGroupSizes(kernel, out threadsX, out threadsY, out threadsZ);
@@ -22,8 +22,8 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var colors = new Color32[pixelCount];
                 var buffer = reader.ReadBytes(1024 + 4 + pixelCount); // 1024 bytes for palette, 4 bytes for data size
 
-                for(var x = 0; x < width; x++)
-                    for(var y = 0; y < height; y++) {
+                for (var x = 0; x < width; x++)
+                    for (var y = 0; y < height; y++) {
                         var palIndex = buffer[1028 + x + width * y] * 4;
                         var colorIndex = x + width * (height - y - 1); // Palette textures are iverted
 
@@ -36,7 +36,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                     };
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
+                texture.Apply(UseMipmaps, false);
 
                 return texture;
             }
@@ -58,7 +58,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                 shader.SetBuffer(kernel, "Indices", indicesBuffer);
                 shader.Dispatch(kernel, width / (int)threadsX, height / (int)threadsY, (int)threadsZ);
 
-                if(UseMipmaps)
+                if (UseMipmaps)
                     texture.GenerateMips();
 
                 return texture;

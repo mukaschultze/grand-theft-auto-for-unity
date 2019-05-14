@@ -7,7 +7,7 @@ namespace GrandTheftAuto.Txd.Decoding {
     public class ColorBlock : Decoder {
 
         public ColorBlock() {
-            if(SystemInfo.supportsComputeShaders) {
+            if (SystemInfo.supportsComputeShaders) {
                 shader = ResourcesHelper.ColorBlockDecoder.Value;
                 kernel = shader.FindKernel("Decode");
                 shader.GetKernelThreadGroupSizes(kernel, out threadsX, out threadsY, out threadsZ);
@@ -21,8 +21,8 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var colors = new Color32[pixelCount];
                 var buffer = reader.ReadBytes(pixelCount * 4);
 
-                for(int x = 0, i = 0; x < width; x++)
-                    for(var y = 0; y < height; y++, i++)
+                for (int x = 0, i = 0; x < width; x++)
+                    for (var y = 0; y < height; y++, i++)
                         colors[x + width * (height - y - 1)] = new Color32() {
                             b = buffer[i * 4 + 0],
                             g = buffer[i * 4 + 1],
@@ -31,7 +31,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                         };
 
                 texture.SetPixels32(colors);
-                texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
+                texture.Apply(UseMipmaps, false);
 
                 return texture;
             }
@@ -49,7 +49,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                 shader.SetBuffer(kernel, "Data", buffer);
                 shader.Dispatch(kernel, width / (int)threadsX, height / (int)threadsY, (int)threadsZ);
 
-                if(UseMipmaps)
+                if (UseMipmaps)
                     texture.GenerateMips();
 
                 return texture;

@@ -20,7 +20,7 @@ namespace GrandTheftAuto.Txd {
 
         public RasterFormat RasterFormat { get { return (RasterFormat)((int)rawRasterFormat % 0x1000); } }
         public RasterFormat RasterFormatEx { get { return (rawRasterFormat - (int)rawRasterFormat % 0x1000); } }
-        public UnityTexture Texture2D { get { if(!loadedTexture)Load(); return loadedTexture; } }
+        public UnityTexture Texture2D { get { if (!loadedTexture)Load(); return loadedTexture; } }
 
         private int offset;
         private RasterFormat rawRasterFormat;
@@ -54,7 +54,7 @@ namespace GrandTheftAuto.Txd {
         }
 
         public Texture(UnityTexture texture, string name, string alphaName, string parentName) {
-            if(!texture)
+            if (!texture)
                 throw new ArgumentNullException("texture");
 
             Name = name;
@@ -65,7 +65,7 @@ namespace GrandTheftAuto.Txd {
         }
 
         public static Texture GetMissingTexture() {
-            if(missing == null)
+            if (missing == null)
                 missing = new Texture(ResourcesHelper.MissingTexture, "Missing", "MissingAlpha", string.Empty);
             return missing;
         }
@@ -76,12 +76,12 @@ namespace GrandTheftAuto.Txd {
                 reader.Position = offset;
 
                 try {
-                    if(RasterFormatEx == RasterFormat.Extension_Palette8)
+                    if (RasterFormatEx == RasterFormat.Extension_Palette8)
                         loadedTexture = Decoder.Palette.DecodeTexture(reader, Width, Height, RasterFormat);
                     else {
                         reader.SkipStream(4); //Data size
 
-                        switch(RasterFormat) {
+                        switch (RasterFormat) {
                             case RasterFormat.Format_565:
                             case RasterFormat.Format_1555:
                                 loadedTexture = Decoder.DXT1.DecodeTexture(reader, Width, Height, RasterFormat);
@@ -110,13 +110,12 @@ namespace GrandTheftAuto.Txd {
                     // What a waste of time
                     // But if we don't do this it's problaby the application will run out of memory
                     // And fucking freeze the entire computer...
-                    if(loadedTexture is Texture2D && Settings.Instance.compressTextures)
+                    if (loadedTexture is Texture2D && Settings.Instance.compressTextures)
                         using(new Timing("Compressing Texture")) {
                             (loadedTexture as Texture2D).Compress(false);
-                            (loadedTexture as Texture2D).Apply(false, true);
+                            (loadedTexture as Texture2D).Apply(false, false);
                         }
-                }
-                catch(Exception e) {
+                } catch (Exception e) {
                     Log.Warning("Failed to load texture \"{0}\": {1}", FullName, e);
                     loadedTexture = missing;
                 } finally {

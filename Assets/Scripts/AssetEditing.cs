@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEditor;
 
-namespace GrandTheftAuto.Editor {
+namespace GrandTheftAuto {
     public class AssetEditing : IDisposable {
         public AssetEditing() {
             AssetDatabase.StartAssetEditing();
