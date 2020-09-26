@@ -32,4 +32,4 @@ You need to provide the full game to be able to load the maps, this extension do
 * IMG
 * Water (partial support, the script that loads it needs to be rewritten)
 
-![GTASA_GoldenGate.png](Assets/Screenshots/Screenshot%20%283%28.png)
+![GTASA_GoldenGate.png](Assets/Screenshots/Screenshot%20%20%283%29.png)
