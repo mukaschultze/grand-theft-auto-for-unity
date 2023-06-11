@@ -9,8 +9,6 @@ Kudos to [GTA Wiki](http://gta.wikia.com), [GTA Modding](http://www.gtamodding.c
 
 This project is currently under development, some things might not work as intended, some textures will be considered as missing, and some objects will have problems loading.
 
-Contact me if you want to help or learn more about the project: [samuelschultze@gmail.com](mailto:samuelschultze@gmail.com)
-
 ### How to use ###
 
 It's very simple to use, just open the project and you will see the menu items on the top of unity editor, it works on windows build too, but you'll need to create your own script that calls the loading methods.
