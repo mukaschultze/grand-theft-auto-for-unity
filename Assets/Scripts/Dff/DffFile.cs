@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Img;
-using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.RenderWare;
 using GrandTheftAuto.Dff.Extensions;
 using UnityEngine;
 

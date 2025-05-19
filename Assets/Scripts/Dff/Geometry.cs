@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GrandTheftAuto.Diagnostics;
-using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.RenderWare;
 using UnityEngine;
 
 namespace GrandTheftAuto.Dff {
@@ -23,13 +23,13 @@ namespace GrandTheftAuto.Dff {
         public List<Material> Materials { get; private set; }
         public Mesh Mesh { get { if(!loadedMesh) Load(); return loadedMesh; } }
 
-        private RenderwaveVersion version;
+        private RenderWareVersion version;
         private Mesh loadedMesh;
         private BufferReader reader;
         private long offset;
         private long nativeOffset;
 
-        public Geometry(BufferReader reader, RenderwaveVersion version) {
+        public Geometry(BufferReader reader, RenderWareVersion version) {
             this.version = version;
             this.reader = reader;
             offset = reader.Position;
@@ -63,7 +63,7 @@ namespace GrandTheftAuto.Dff {
                     var vertexCount = reader.ReadInt32();
                     reader.SkipStream(4); //Number of morph targets 
 
-                    if(version < RenderwaveVersion.ViceCity_2) {
+                    if(version < RenderWareVersion.ViceCity_2) {
                         reader.PrewarmBuffer(12);
 
                         var ambient = reader.ReadSingle();
@@ -85,15 +85,13 @@ namespace GrandTheftAuto.Dff {
                     if((flags | GeometrySectionFlags.HasUV2) == flags) {
                         uv = ReadVector2Array(vertexCount);
                         uv2 = ReadVector2Array(vertexCount);
-                    }
-                    else if((flags | GeometrySectionFlags.HasUV) == flags)
+                    } else if((flags | GeometrySectionFlags.HasUV) == flags)
                         uv = ReadVector2Array(vertexCount);
 
                     if(nativeOffset != 0) {
                         tris = ReadTrisFromNative(out subMeshCount);
                         reader.SkipStream(triCount * 8);
-                    }
-                    else
+                    } else
                         tris = ReadTris(triCount);
 
                     reader.SkipStream(16); //Bounding sphere
@@ -130,9 +128,11 @@ namespace GrandTheftAuto.Dff {
 
                     loadedMesh.RecalculateBounds();
                     loadedMesh.UploadMeshData(true);
+                } catch(Exception e) {
+                    Log.Exception(e);
+                } finally {
+                    reader.Position = position;
                 }
-                catch(Exception e) { Log.Exception(e); }
-                finally { reader.Position = position; }
             }
         }
 
@@ -180,13 +180,11 @@ namespace GrandTheftAuto.Dff {
                 }
 
                 return tris;
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Exception(e);
                 subMeshCount = 0;
                 return null;
-            }
-            finally {
+            } finally {
                 reader.Position = position;
             }
         }

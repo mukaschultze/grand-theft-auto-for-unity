@@ -1,4 +1,4 @@
-﻿namespace GrandTheftAuto.Renderwave {
+﻿namespace GrandTheftAuto.RenderWare {
     ///http://www.gtamodding.com/wiki/List_of_RW_section_IDs
     public enum SectionType {
         Undefined = 0x0000,

@@ -1,6 +1,6 @@
-﻿namespace GrandTheftAuto.Renderwave {
+﻿namespace GrandTheftAuto.RenderWare {
     ///http://www.gtamodding.com/wiki/RenderWare_binary_stream_file
-    public enum RenderwaveVersion {
+    public enum RenderWareVersion {
         /// <summary>
         /// 3.1.0.0
         /// </summary>

@@ -1,6 +1,6 @@
 ﻿using System;
 using GrandTheftAuto.Diagnostics;
-using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.RenderWare;
 using GrandTheftAuto.Shared;
 using GrandTheftAuto.Txd.Decoding;
 using UnityEngine;

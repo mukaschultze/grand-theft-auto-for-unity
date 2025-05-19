@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Img;
-using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.RenderWare;
 
 namespace GrandTheftAuto.Txd {
     public class TxdFile : IEnumerable<Texture> {
@@ -88,7 +88,7 @@ namespace GrandTheftAuto.Txd {
 
                             default:
                                 reader.SkipStream(header.Size);
-                                Log.Message("Ignored renderwave section {0} in {1}", parent.Type, FileNameWithoutExtension);
+                                Log.Message("Ignored renderware section {0} in {1}", parent.Type, FileNameWithoutExtension);
                                 break;
                         }
                         break;
@@ -101,7 +101,7 @@ namespace GrandTheftAuto.Txd {
 
                     default:
                         reader.SkipStream(header.Size);
-                        Log.Message("Ignored renderwave section {0} in {1}", header.Type, FileNameWithoutExtension);
+                        Log.Message("Ignored renderware section {0} in {1}", header.Type, FileNameWithoutExtension);
                         break;
                 }
 
