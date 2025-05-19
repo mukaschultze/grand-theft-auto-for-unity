@@ -1,5 +1,4 @@
-﻿using System;
-using GrandTheftAuto.Diagnostics;
+﻿using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Shared;
 using UnityEngine;
 using UnityTexture = UnityEngine.Texture;
@@ -21,10 +20,12 @@ namespace GrandTheftAuto.Txd.Decoding {
 
                 var texture = GetTexture2D(width, height, rasterFormat);
                 var colors = new Color32[width * height];
-                var c0 = new Color32();
-                var c1 = new Color32();
-                var c2 = new Color32();
-                var c3 = new Color32();
+
+                // make sure colors always have alpha 1
+                var c0 = (Color32)Color.white;
+                var c1 = (Color32)Color.white;
+                var c2 = (Color32)Color.white;
+                var c3 = (Color32)Color.white;
                 var black = (rasterFormat == RasterFormat.Format_1555) ? new Color32(0, 0, 0, 0) : new Color32(0, 0, 0, 255);
 
                 reader.PrewarmBuffer((width / 4) * (height / 4) * 8);
@@ -53,36 +54,16 @@ namespace GrandTheftAuto.Txd.Decoding {
                         if((code & 0xFFFF) > ((code & 0xFFFF0000) >> 16)) {
                             c2 = SumColor(MultiplyColor(c0, 0.66666666f), MultiplyColor(c1, 0.33333333f));
                             c3 = SumColor(MultiplyColor(c0, 0.33333333f), MultiplyColor(c1, 0.66666666f));
-                        }
-                        else {
+                        } else {
                             c2 = SumColor(MultiplyColor(c0, 0.5f), MultiplyColor(c1, 0.5f));
                             c3 = black;
                         }
 
                         for(var yy = 0; yy < 4; yy++)
                             for(var xx = 0; xx < 4; xx++) {
-                                switch(indices % 4) {
-                                    case 0:
-                                        black = c0;
-                                        break;
-
-                                    case 1:
-                                        black = c1;
-                                        break;
-
-                                    case 2:
-                                        black = c2;
-                                        break;
-
-                                    case 3:
-                                        black = c3;
-                                        break;
-
-                                    default:
-                                        throw new Exception("Invalid color index for DXT1");
-                                }
-
-                                colors[(height - 1 - y - yy) * width + (x + xx)] = black;
+                                var idx = indices % 4;
+                                var result = idx == 0 ? c0 : idx == 1 ? c1 : idx == 2 ? c2 : c3;
+                                colors[(height - 1 - y - yy) * width + (x + xx)] = result;
                                 indices >>= 2;
                             }
                     }
