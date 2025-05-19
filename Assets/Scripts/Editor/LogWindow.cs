@@ -14,9 +14,10 @@ namespace GrandTheftAuto.Editor {
         private const float SELECTED_INFO_WINDOW_PERCENT = 0.3f;
 
         private static class Styles {
-            public static GUIStyle info = "CN EntryInfo";
-            public static GUIStyle warning = "CN EntryWarn";
-            public static GUIStyle error = "CN EntryError";
+            public static GUIStyle label = "CN EntryInfo";
+            public static GUIStyle info = "CN EntryInfoIcon";
+            public static GUIStyle warning = "CN EntryWarnIcon";
+            public static GUIStyle error = "CN EntryErrorIcon";
             public static GUIStyle background = "CN Box";
             public static GUIStyle messages = "CN Message";
 
@@ -75,8 +76,11 @@ namespace GrandTheftAuto.Editor {
 
         private Log SelectedLog {
             get {
-                try { return filteredLogs[selectedLogIndex]; }
-                catch { return new Log(); }
+                try {
+                    return filteredLogs[selectedLogIndex];
+                } catch {
+                    return new Log();
+                }
             }
         }
 
@@ -245,9 +249,11 @@ namespace GrandTheftAuto.Editor {
                             break;
                     }
 
+                    tempContent.image = style.normal.background;
                     tempContent.text = string.Format("{0}\n<b><size=9>{1}</size></b>", log.LogString.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)[0], log.StackTrace);
                     ((index & 1) == 1 ? Styles.backgroundOdd : Styles.backgroundEven).Draw(rect, false, false, selectedLogIndex == index, false);
                     style.Draw(rect, tempContent, 0, selectedLogIndex == index);
+                    Styles.label.Draw(rect, tempContent, 0, selectedLogIndex == index);
                     break;
             }
 
