@@ -1,0 +1,32 @@
+Create the font using https://yal.cc/tools/pixel-font/
+Input = everything to zero
+Monospaced = true
+Output pixel size = 64
+
+! & 
+()+ 
+-. 0
+1234
+5678
+9;:?
+ABCD
+EFGH
+IJKL
+MNOP
+QRST
+UVWX
+YZ[ 
+]abc
+defg
+hijk
+lmno
+pqrs
+tuvw
+xyz 
+  <>
+^~%#
+$*@|
+{ } 
+    
+    
+_   
