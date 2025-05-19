@@ -22,8 +22,8 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var colors = new Color32[pixelCount];
                 var buffer = reader.ReadBytes(1024 + 4 + pixelCount); // 1024 bytes for palette, 4 bytes for data size
 
-                for(var x = 0; x < width; x++)
-                    for(var y = 0; y < height; y++) {
+                for(var y = 0; y < height; y++)
+                    for(var x = 0; x < width; x++) {
                         var palIndex = buffer[1028 + x + width * y] * 4;
                         var colorIndex = x + width * (height - y - 1); // Palette textures are iverted
 
