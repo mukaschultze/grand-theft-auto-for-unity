@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <!-- Product name as page title -->
+    <title>{{{PRODUCT_NAME}}}</title>
+
+    <!-- Page Styling -->
+    <style type="text/css">
+      body {
+        margin: 0;
+        background: {{{BACKGROUND_COLOR}}};
+      }
+
+      #gameContainer {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .pre-loader {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        display: none;
+      }
+
+      .pre-loader .title {
+        color: #eee;
+        letter-spacing: 0.1em;
+      }
+
+      .progress-bar {
+        width: 40%;
+        padding: 5px;
+        background: #1a1a1a;
+        box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
+        border-radius: 18px;
+      }
+
+      .progress-bar .fill {
+        background: #34c2e3;
+        height: 24px;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+        border-radius: 18px;
+        color: #fff;
+        text-align: center;
+        line-height: 24px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- The webgl canvas will be loaded inside gameContainer -->
+    <canvas id="gameContainer"></canvas>
+
+    <div class="pre-loader">
+      <h3 class="title">LOADING...</h3>
+      <div class="progress-bar">
+        <div class="fill" style="width: 20%">10%</div>
+      </div>
+    </div>
+  </body>
+
+  <!-- UnityLoader.js is enqueued here -->
+  <script src="Build/{{{LOADER_FILENAME}}}"></script>
+
+  <script type="text/javascript" defer>
+    const preLoader = document.querySelector(".pre-loader");
+    const progressBar = preLoader.querySelector(".progress-bar .fill");
+    const canvas = document.getElementById("gameContainer");
+
+    const onProgress = function (progress) {
+      //Update the fill element width by progress
+      const percentString = 100 * progress + "%";
+      progressBar.textContent = percentString;
+      progressBar.style.width = percentString;
+    };
+
+    const buildUrl = "Build";
+    const config = {
+      dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+      frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+      codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+      #if MEMORY_FILENAME
+      memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+      #endif
+      #if SYMBOLS_FILENAME
+      symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+      #endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "{{{ COMPANY_NAME }}}",
+      productName: "{{{ PRODUCT_NAME }}}",
+      productVersion: "{{{ PRODUCT_VERSION }}}",
+    };
+
+    const gameInstance = createUnityInstance(canvas, config, onProgress).catch(console.error);
+  </script>
+</html>
