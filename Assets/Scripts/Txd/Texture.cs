@@ -20,7 +20,7 @@ namespace GrandTheftAuto.Txd {
 
         public RasterFormat RasterFormat { get { return (RasterFormat)((int)rawRasterFormat % 0x1000); } }
         public RasterFormat RasterFormatEx { get { return (rawRasterFormat - (int)rawRasterFormat % 0x1000); } }
-        public UnityTexture Texture2D { get { if(!loadedTexture)Load(); return loadedTexture; } }
+        public UnityTexture Texture2D { get { if(!loadedTexture) Load(); return loadedTexture; } }
 
         private int offset;
         private RasterFormat rawRasterFormat;
@@ -131,7 +131,7 @@ namespace GrandTheftAuto.Txd {
         }
 
         public static implicit operator UnityTexture(Texture tex) {
-            return tex.Texture2D;
+            return tex?.Texture2D;
         }
 
     }
