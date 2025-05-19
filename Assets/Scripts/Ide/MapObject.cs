@@ -14,8 +14,7 @@ namespace GrandTheftAuto.Ide {
             if(tokens.Length == 5) {
                 ObjectCount = 1;
                 DrawDistance = float.Parse(tokens[3]);
-            }
-            else {
+            } else {
                 ObjectCount = int.Parse(tokens[3]);
                 DrawDistance = float.Parse(tokens[4]);
             }
@@ -38,6 +37,9 @@ namespace GrandTheftAuto.Ide {
                 if(mapObject == null)
                     return;
 
+                if(frame.Name.EndsWith("_l1", StringComparison.OrdinalIgnoreCase))
+                    transform.gameObject.SetActive(false);
+
                 mapObject.SetLayer(transform.gameObject);
             };
             RendererModifiers += (renderer, geometry, txdName, definition) => {
@@ -51,17 +53,18 @@ namespace GrandTheftAuto.Ide {
         }
 
         private void MarkAsShadow(GameObject go) {
-            go.SetActive((Flags & DefinitionFlags.Shadows) == 0);
+            if((Flags & DefinitionFlags.Shadows) != 0)
+                go.SetActive(false);
         }
 
         private void SetLayer(GameObject go) {
             if(DrawDistance > 300f) {
-                if(go.name.StartsWith("IslandLOD", StringComparison.Ordinal))
+                if(go.name.StartsWith("IslandLOD", StringComparison.Ordinal)) {
                     go.layer = Layer.IslandLOD;
-                else
+                    go.SetActive(false); // temp disable
+                } else
                     go.layer = Layer.LOD;
-            }
-            else if((Flags | DefinitionFlags.DrawDistanceOff) == Flags)
+            } else if((Flags | DefinitionFlags.DrawDistanceOff) == Flags)
                 go.layer = Layer.CullOff;
             else if(DrawDistance <= 50f)
                 go.layer = Layer.LowDistance;

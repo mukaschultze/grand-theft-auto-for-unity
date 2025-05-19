@@ -48,22 +48,22 @@ namespace GrandTheftAuto {
         }
 
         public Loader(DefinitionCollection itemDefinitions, ModelCollection modelCollection, TextureCollection textureCollection) {
-                if(Current != null)
-                    throw new Exception("Another loader already in progress, make sure only one loader run at a time");
+            if(Current != null)
+                throw new Exception("Another loader already in progress, make sure only one loader run at a time");
 
-                Current = this;
-                IdeCollection = itemDefinitions;
-                ModelCollection = modelCollection;
-                TxdCollection = textureCollection;
-            }
+            Current = this;
+            IdeCollection = itemDefinitions;
+            ModelCollection = modelCollection;
+            TxdCollection = textureCollection;
+        }
 
-            ~Loader() {
-                if(Current == null)
-                    return;
+        ~Loader() {
+            if(Current == null)
+                return;
 
-                Dispose();
-                Log.Warning("Loader not disposed, make sure to dispose it when the loading is over");
-            }
+            Dispose();
+            Log.Warning("Loader not disposed, make sure to dispose it when the loading is over");
+        }
 
         public void Load() {
             using(new Timing("Loading " + Version.GetFormatedGTAName(true)))
@@ -71,48 +71,51 @@ namespace GrandTheftAuto {
             using(new MemoryCounter())
             using(var workingFolder = new TempWorkingFolder(Path))
             using(var progress = new ProgressBar("Loading " + Version.GetFormatedGTAName() + " map", 0, workingFolder, 32))
-            try {
-                DefaultData = DataFile.GetMainData(Version);
-                SpecificData = DataFile.GetVersionSpecificData(Version);
+                try {
+                    DefaultData = DataFile.GetMainData(Version);
+                    SpecificData = DataFile.GetVersionSpecificData(Version);
 
-                Gta3img = ImgFile.GetMainImg(Version);
+                    Gta3img = ImgFile.GetMainImg(Version);
 
-                IdeCollection = new DefinitionCollection() { DefaultData, SpecificData };
-                IplCollection = new PlacementCollection() { DefaultData, SpecificData, Gta3img };
-                TxdCollection = new TextureCollection() { DefaultData, SpecificData, Gta3img };
-                ModelCollection = new ModelCollection() { DefaultData, SpecificData, Gta3img };
+                    IdeCollection = new DefinitionCollection() { DefaultData, SpecificData };
+                    IplCollection = new PlacementCollection() { DefaultData, SpecificData, Gta3img };
+                    TxdCollection = new TextureCollection() { DefaultData, SpecificData, Gta3img };
+                    ModelCollection = new ModelCollection() { DefaultData, SpecificData, Gta3img };
 
-                TxdCollection.AddTextureParent(DefaultData);
-                TxdCollection.AddTextureParent(SpecificData);
+                    IplCollection.ResolveNamedLOD();
 
-                //ItemDefinition.TransformModifiers += SetStatic;
-                progress.Count = IplCollection.AllPlacements.Count();
+                    TxdCollection.AddTextureParent(DefaultData);
+                    TxdCollection.AddTextureParent(SpecificData);
+
+                    ItemDefinition.TransformModifiers += SetStatic;
+                    progress.Count = IplCollection.AllPlacements.Count();
 
                     new WaterFile("data/water.dat", Version).CreateUnityWater();
 
-                foreach(var placement in IplCollection) {
-                    Place(placement, progress);
+                    foreach(var placement in IplCollection) {
+                        Place(placement, progress);
 
-                    if(progress.Canceled)
-                        return;
+                        if(progress.Canceled)
+                            return;
+                    }
+
+                    // if(!Camera.main.GetComponent<FreeCamera>())
+                    //     Camera.main.gameObject.AddComponent<FreeCamera>();
+                    if(!Camera.main.GetComponent<CameraLod>())
+                        Camera.main.gameObject.AddComponent<CameraLod>();
+                    if(!Camera.main.GetComponent<DynamicLod>())
+                        Camera.main.gameObject.AddComponent<DynamicLod>();
+                } catch(Exception e) {
+                    Log.Error("FAILED TO LOAD");
+                    Log.Exception(e);
+                } finally {
+                    ItemDefinition.TransformModifiers -= SetStatic;
+#if UNITY_EDITOR
+                    UnityEditor.Lightmapping.bakedGI = false;
+                    UnityEditor.Lightmapping.realtimeGI = false;
+                    UnityEditor.EditorApplication.Beep();
+#endif
                 }
-
-                if(!Camera.main.GetComponent<FreeCamera>())
-                    Camera.main.gameObject.AddComponent<FreeCamera>();
-                if(!Camera.main.GetComponent<CameraLod>())
-                    Camera.main.gameObject.AddComponent<CameraLod>();
-            }
-            catch(Exception e) {
-                Log.Error("FAILED TO LOAD");
-                Log.Exception(e);
-            } finally {
-                ItemDefinition.TransformModifiers -= SetStatic;
-                #if UNITY_EDITOR
-                UnityEditor.Lightmapping.bakedGI = false;
-                UnityEditor.Lightmapping.realtimeGI = false;
-                UnityEditor.EditorApplication.Beep();
-                #endif
-            }
         }
 
         public void SetStatic(Transform transform, Frame frame, ItemDefinition definition) {
@@ -121,39 +124,40 @@ namespace GrandTheftAuto {
 
         public GameObject Place(ItemPlacement placement, ProgressBar progress) {
             using(new Timing("Placing"))
-            try {
-                progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
+                try {
+                    progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
 
-                var definition = IdeCollection[placement.DefinitionID];
+                    var definition = IdeCollection[placement.DefinitionID];
                     var obj = definition.GetObject(placement.Position, placement.Rotation);
 
-                if(IplCollection.GetLodVersion(placement, out placement))
-                    if(!obj.GetComponent<LODGroup>()) {
-                        var lodObj = Place(placement, progress);
-                        var lodGroupGO = new GameObject(obj.name + " (LOD Group)");
-                        var lodGroup = lodGroupGO.AddComponent<LODGroup>();
+                    if(IplCollection.GetLodVersion(placement, out placement))
+                        if(!obj.GetComponent<LODGroup>()) {
+                            var lodObj = Place(placement, progress);
+                            var lodGroupGO = new GameObject(obj.name + " (LOD Group)");
+                            var lodGroup = lodGroupGO.AddComponent<LODGroup>();
 
-                        obj.transform.SetParent(lodGroupGO.transform);
-                        lodObj.transform.SetParent(lodGroupGO.transform);
-                        lodGroupGO.layer = Layer.LODGroup;
+                            obj.transform.SetParent(lodGroupGO.transform);
+                            lodObj.transform.SetParent(lodGroupGO.transform);
+                            lodGroupGO.layer = Layer.LODGroup;
 
-                        foreach(var child in obj.GetComponentsInChildren<Transform>())
-                            child.gameObject.layer = Layer.LODGroup;
-                        foreach(var child in lodObj.GetComponentsInChildren<Transform>())
-                            child.gameObject.layer = Layer.LODGroup;
+                            foreach(var child in obj.GetComponentsInChildren<Transform>())
+                                child.gameObject.layer = Layer.LODGroup;
+                            foreach(var child in lodObj.GetComponentsInChildren<Transform>())
+                                child.gameObject.layer = Layer.LODGroup;
 
-                        lodGroup.SetLODs(new LOD[] {
-                            new LOD(0.5f, obj.GetComponentsInChildren<Renderer>()),
+                            lodGroup.SetLODs(new LOD[] {
+                                new LOD(0.5f, obj.GetComponentsInChildren<Renderer>()),
                                 new LOD(0f, lodObj.GetComponentsInChildren<Renderer>())
-                        });
-                    }
+                            });
+                            lodGroup.animateCrossFading = true;
+                            lodGroup.fadeMode = LODFadeMode.CrossFade;
+                        }
 
-                return obj;
-            }
-            catch(Exception e) {
-                Log.Error("Failed to place object \"{0}\" (ID {1}): {2}", placement.ItemName, placement.DefinitionID, e);
-                return null;
-            }
+                    return obj;
+                } catch(Exception e) {
+                    Log.Error("Failed to place object \"{0}\" (ID {1}): {2}", placement.ItemName, placement.DefinitionID, e);
+                    return null;
+                }
         }
 
         public void Dispose() {

@@ -6,18 +6,19 @@ using System.Linq;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Img;
+using UnityEngine;
 
 namespace GrandTheftAuto.Ipl {
     public class PlacementCollection : IEnumerable<ItemPlacement> {
 
         private const string STREAMING_IPL_NAME_FORMAT = "{0}_stream{1}.ipl";
 
-        private Dictionary<string, IplFile> textIPLs = new Dictionary<string, IplFile>(StringComparer.OrdinalIgnoreCase);
-        private List<ItemPlacement> allPlacements = new List<ItemPlacement>();
-        private Dictionary<ItemPlacement, ItemPlacement> lodLinks = new Dictionary<ItemPlacement, ItemPlacement>();
+        private readonly Dictionary<string, IplFile> textIPLs = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<ItemPlacement> allPlacements = new();
+        private readonly Dictionary<ItemPlacement, ItemPlacement> lodLinks = new();
+        private readonly HashSet<ItemPlacement> lodPlacements = new();
 
         public ItemPlacement[] AllPlacements { get { return allPlacements.ToArray(); } }
-        public ItemPlacement[] NonLodPlacements { get; private set; }
 
         public void Add(DataFile data) {
             using(new Timing("Adding Placements (data)"))
@@ -29,7 +30,6 @@ namespace GrandTheftAuto.Ipl {
             using(new Timing("Adding Placements (ipl)")) {
                 textIPLs.Add(Path.GetFileNameWithoutExtension(ipl.FilePath), ipl);
                 allPlacements.AddRange(ipl);
-                NonLodPlacements = AllPlacements;
             }
         }
 
@@ -39,7 +39,8 @@ namespace GrandTheftAuto.Ipl {
                 return;
             }
 
-            allPlacements = new List<ItemPlacement>();
+            // clear LOD loaded from other IPLs
+            allPlacements.Clear();
 
             using(new Timing("Adding Placements (streaming)"))
                 foreach(var kvp in textIPLs) {
@@ -51,9 +52,7 @@ namespace GrandTheftAuto.Ipl {
                             var binaryIplName = string.Format(STREAMING_IPL_NAME_FORMAT, textIplName, i++);
                             placements.AddRange(new BinaryIpl(img[binaryIplName]));
                         }
-                    }
-                    catch(KeyNotFoundException) { }
-                    catch(Exception e) { Log.Exception(e); }
+                    } catch(KeyNotFoundException) { } catch(Exception e) { Log.Exception(e); }
 
                     using(new Timing("Resolving LODs"))
                         for(var i = 0; i < placements.Count; i++) {
@@ -64,18 +63,32 @@ namespace GrandTheftAuto.Ipl {
 
                             try {
                                 var lodVersion = placements[placement.LodDefinitionID];
-                                lodVersion.IsLOD = true;
+                                lodPlacements.Add(lodVersion);
                                 lodLinks.Add(placement, placements[placement.LodDefinitionID] = lodVersion);
-                            }
-                            catch(Exception e) { Log.Error("Failed to resolve LOD link, object {0}({1}) with lod {2}: {3}", placement.ItemName, placement.DefinitionID, placement.LodDefinitionID, e); }
+                            } catch(Exception e) { Log.Error("Failed to resolve LOD link, object {0}({1}) with lod {2}: {3}", placement.ItemName, placement.DefinitionID, placement.LodDefinitionID, e); }
                         }
 
                     allPlacements.AddRange(placements);
                 }
+        }
 
-            NonLodPlacements = (from plac in allPlacements
-                                where !plac.IsLOD
-                                select plac).ToArray();
+        public void ResolveNamedLOD() {
+            if(Loader.Current.Version == GtaVersion.SanAndreas)
+                return;
+
+            using(new Timing("Resolving LODs (Named)")) {
+                var lods = allPlacements.Where(placement => placement.ItemName.StartsWith("LOD"));
+
+                foreach(var lod in lods) {
+                    try {
+                        var nearest = allPlacements.First(placement => Vector3.SqrMagnitude(placement.Position - lod.Position) < 0.01 && placement.ItemName.Substring(3) == lod.ItemName.Substring(3));
+                        lodLinks.Add(nearest, lod);
+                        lodPlacements.Add(lod);
+                    } catch(Exception e) {
+                        Log.Error("Failed to resolve LOD link, object {0}: {1}", lod.ItemName, e);
+                    }
+                }
+            }
         }
 
         public bool GetLodVersion(ItemPlacement highResVersion, out ItemPlacement lowResVersion) {
@@ -83,19 +96,21 @@ namespace GrandTheftAuto.Ipl {
         }
 
         public IEnumerator<ItemPlacement> GetEnumerator() {
-            NonLodPlacements = (from plac in NonLodPlacements
-                                orderby plac.DefinitionID
-                                select plac).ToArray();
+            var nonLodPlacements = (from plac in allPlacements
+                                    where !lodPlacements.Contains(plac)
+                                    orderby plac.DefinitionID
+                                    select plac).ToArray();
 
-            return ((IEnumerable<ItemPlacement>)NonLodPlacements).GetEnumerator();
+            return ((IEnumerable<ItemPlacement>)nonLodPlacements).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            NonLodPlacements = (from plac in NonLodPlacements
-                                orderby plac.DefinitionID
-                                select plac).ToArray();
+            var nonLodPlacements = (from plac in allPlacements
+                                    where !lodPlacements.Contains(plac)
+                                    orderby plac.DefinitionID
+                                    select plac).ToArray();
 
-            return ((IEnumerable<ItemPlacement>)NonLodPlacements).GetEnumerator();
+            return ((IEnumerable<ItemPlacement>)nonLodPlacements).GetEnumerator();
         }
     }
 }

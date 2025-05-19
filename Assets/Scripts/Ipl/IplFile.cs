@@ -60,8 +60,7 @@ namespace GrandTheftAuto.Ipl {
         private void ProcessNewSectionStart(string line) {
             try {
                 currentSection = (IPLSection)Enum.Parse(typeof(IPLSection), line, true);
-            }
-            catch {
+            } catch {
                 Log.Warning("Unknow IPL section {0} in \"{1}\"", line.ToUpper(), FilePath);
                 currentSection = IPLSection.Unknow;
             }
@@ -116,8 +115,7 @@ namespace GrandTheftAuto.Ipl {
                         return false;
                 }
 
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.Error("Failed to parse IPL line at \"{0}\", line \"{1}\", section {2}: {3}", FilePath, line, currentSection, e);
                 return false;
             }

@@ -50,12 +50,15 @@ namespace GrandTheftAuto.Dff {
                             texture = txds[TextureName];
                         if(!string.IsNullOrEmpty(MaskName))
                             mask = txds[MaskName];
-                    }
-                    else {
+                        // else if(!string.IsNullOrEmpty(TextureName))
+                        //     mask = txds[TextureName + "a"];
+                    } else {
                         if(!string.IsNullOrEmpty(TextureName))
                             texture = txds[txdName, TextureName];
                         if(!string.IsNullOrEmpty(MaskName))
                             mask = txds[txdName, MaskName];
+                        // else if(!string.IsNullOrEmpty(TextureName))
+                        //     mask = txds[txdName, TextureName + "a"];
                     }
 
                     if(mask == Texture.GetMissingTexture())
