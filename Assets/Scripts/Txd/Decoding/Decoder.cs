@@ -87,16 +87,16 @@ namespace GrandTheftAuto.Txd.Decoding {
             switch(format) {
                 case RasterFormat.Format_555:
                 case RasterFormat.Format_565:
-                    //result = RenderTextureFormat.RGB565;
-                    //break;
+                //result = RenderTextureFormat.RGB565;
+                //break;
 
                 case RasterFormat.Format_1555:
-                    //result = RenderTextureFormat.ARGB1555;
-                    //break;
+                //result = RenderTextureFormat.ARGB1555;
+                //break;
 
                 case RasterFormat.Format_4444:
-                    //result = RenderTextureFormat.ARGB4444;
-                    //break;
+                //result = RenderTextureFormat.ARGB4444;
+                //break;
 
                 case RasterFormat.Format_888:
                 case RasterFormat.Format_8888:

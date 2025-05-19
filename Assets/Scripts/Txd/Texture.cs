@@ -113,10 +113,9 @@ namespace GrandTheftAuto.Txd {
                     if(loadedTexture is Texture2D && Settings.Instance.compressTextures)
                         using(new Timing("Compressing Texture")) {
                             (loadedTexture as Texture2D).Compress(false);
-                            (loadedTexture as Texture2D).Apply(false, true);
+                            (loadedTexture as Texture2D).Apply(Settings.Instance.useMipmaps, true);
                         }
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Warning("Failed to load texture \"{0}\": {1}", FullName, e);
                     loadedTexture = missing;
                 } finally {
