@@ -147,13 +147,13 @@ namespace GrandTheftAuto.Txd.Decoding {
         }
 
         protected static RenderTexture GetRenderTexture(int width, int height, RasterFormat rasterFormat) {
-            var texture = new RenderTexture(width, height, 0, GetRenderTextureFormat(rasterFormat)) {
+            var texture = new RenderTexture(width, height, 0, UnityEngine.Experimental.Rendering.DefaultFormat.LDR) {
                 enableRandomWrite = true,
                 useMipMap = UseMipmaps,
                 autoGenerateMips = false,
                 filterMode = FilterMode.Bilinear,
                 anisoLevel = 16,
-                antiAliasing = 2,
+                antiAliasing = 0,
                 wrapMode = TextureWrapMode.Repeat
             };
 
