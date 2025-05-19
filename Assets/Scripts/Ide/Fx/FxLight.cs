@@ -51,6 +51,11 @@ namespace GrandTheftAuto.Ide.Fx {
                 loadedLight.intensity = Size;
                 loadedLight.bounceIntensity = 0f;
 
+                // Lights are causing a OOM crash on Direct3D12
+                if(SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Direct3D12) {
+                    loadedLight.enabled = false;
+                }
+
                 switch(Flash) {
                     case FlashType.TrafficLights:
                         loadedLight.enabled = false;
