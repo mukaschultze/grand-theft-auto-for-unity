@@ -50,5 +50,7 @@
         "ProjectSettings/": true,
         "temp/": true,
         "Temp/": true
-    }
+    },
+    "dotnet.defaultSolution": "grand-theft-auto-for-unity.sln",
+    "dotnet.server.useOmnisharp": true
 }
