@@ -110,5 +110,5 @@ MonoBehaviour:
   clipPlaneOffset: {x: 0.1, y: 0.1, z: 10}
   reflectLayers:
     serializedVersion: 2
-    m_Bits: 1040439
+    m_Bits: 4294967295
   garbageCollection: 0

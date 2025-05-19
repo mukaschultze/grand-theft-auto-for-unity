@@ -121,7 +121,8 @@ namespace GrandTheftAuto.Dff {
 
 #if UNITY_EDITOR
                     using(new Timing("Optimizing mesh")) {
-                        UnityEditor.MeshUtility.SetMeshCompression(loadedMesh, UnityEditor.ModelImporterMeshCompression.High);
+                        // compression causes misalignment for some large meshes
+                        UnityEditor.MeshUtility.SetMeshCompression(loadedMesh, UnityEditor.ModelImporterMeshCompression.Off);
                         UnityEditor.MeshUtility.Optimize(loadedMesh);
                     }
 #endif

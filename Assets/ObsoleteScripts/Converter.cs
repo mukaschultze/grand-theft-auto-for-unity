@@ -2,12 +2,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.Playables;
-using System;
+using GrandTheftAuto.Diagnostics;
 
 namespace GrandTheftAuto {
     public static class Converter {
         public static GameObject CreateUnityWater(this WaterFile water) {
+            using(new Timing("Creating Water GameObject"))
             using(var helper = new VertexHelper()) {
                 var planes = water.Planes.ToList();
 
@@ -47,6 +47,14 @@ namespace GrandTheftAuto {
                 mesh.name = "Water";
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
+
+#if UNITY_EDITOR
+                using(new Timing("Optimizing Water Mesh")) {
+                    // compression causes misalignment for some large meshes
+                    UnityEditor.MeshUtility.SetMeshCompression(mesh, UnityEditor.ModelImporterMeshCompression.Off);
+                    UnityEditor.MeshUtility.Optimize(mesh);
+                }
+#endif
 
                 // go.GetComponent<MeshRenderer>().material = ResourcesHelper.WaterPrefab;
                 go.GetComponent<MeshFilter>().sharedMesh = mesh;
