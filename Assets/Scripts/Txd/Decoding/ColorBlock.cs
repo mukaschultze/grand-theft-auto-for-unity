@@ -21,14 +21,17 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var colors = new Color32[pixelCount];
                 var buffer = reader.ReadBytes(pixelCount * 4);
 
-                for(int x = 0, i = 0; x < width; x++)
-                    for(var y = 0; y < height; y++, i++)
+                var i = 0;
+                for(var y = 0; y < height; y++)
+                    for(int x = 0; x < width; x++) {
                         colors[x + width * (height - y - 1)] = new Color32() {
                             b = buffer[i * 4 + 0],
                             g = buffer[i * 4 + 1],
                             r = buffer[i * 4 + 2],
                             a = buffer[i * 4 + 3]
                         };
+                        i++;
+                    }
 
                 texture.SetPixels32(colors);
                 texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
