@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Img;
 using GrandTheftAuto.Renderwave;
+using GrandTheftAuto.Dff.Extensions;
 using UnityEngine;
 
 namespace GrandTheftAuto.Dff {
@@ -20,14 +21,14 @@ namespace GrandTheftAuto.Dff {
 
                 try {
                     return frames[rootFrameIndex];
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Error("Failed to get root frame on \"{0}\": {1}", FileName, e);
                     return new Frame() { Name = "Error" };
                 }
             }
         }
         public Frame[] Frames { get { if(!loaded) Load(); return frames; } }
+        public List<Effect2D> Effects { get { if(!loaded) Load(); return effects; } }
 
         private bool loaded;
         private bool isAlphaMaskString;
@@ -37,6 +38,7 @@ namespace GrandTheftAuto.Dff {
         private BufferReader reader;
         private FileEntry file;
         private List<Geometry> geometries;
+        private List<Effect2D> effects;
 
         public DffFile(string filePath) : this(new FileEntry(filePath)) { }
 
@@ -47,13 +49,12 @@ namespace GrandTheftAuto.Dff {
                 try {
                     reader = file.Reader;
                     geometries = new List<Geometry>();
+                    effects = new List<Effect2D>();
                     ProcessSection(new SectionHeader(reader));
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Warning("Error loading {0}", FileName);
                     Log.Exception(e);
-                }
-                finally {
+                } finally {
                     loaded = true;
                     geometries = null;
                     reader = null;
@@ -66,6 +67,7 @@ namespace GrandTheftAuto.Dff {
 
             while(reader.Position < end) {
                 var header = new SectionHeader(reader);
+                var endsAt = reader.Position + header.Size;
 
                 switch(header.Type) {
                     case SectionType.Extension:
@@ -104,9 +106,21 @@ namespace GrandTheftAuto.Dff {
                         ParseMaterialReflection();
                         break;
 
+                    case SectionType.Effect2D:
+                        ParseEffect2D();
+                        break;
+
                     default:
                         reader.SkipStream(header.Size);
                         break;
+                }
+
+                if(reader.Position < endsAt) {
+                    Log.Warning("Section \"{0}\" (size {1}) not fully read ({2} bytes left) in \"{3}\"", header.Type, header.Size, endsAt - reader.Position, FileName);
+                    reader.Position = endsAt;
+                } else if(reader.Position > endsAt) {
+                    Log.Warning("Section \"{0}\" (size {1}) overflows ({2} bytes over) in \"{3}\"", header.Type, header.Size, reader.Position - endsAt, FileName);
+                    reader.Position = endsAt;
                 }
             }
         }
@@ -196,9 +210,8 @@ namespace GrandTheftAuto.Dff {
 
                 if(frameParentIndex != -1) {
                     frame.Parent = frames[frameParentIndex];
-                    frame.Parent.Childs.Add(frame);
-                }
-                else if(rootFrameIndex == -1)
+                    frame.Parent.Children.Add(frame);
+                } else if(rootFrameIndex == -1)
                     rootFrameIndex = i;
                 else
                     Log.Error("More than one root frame in {0}", FileName);
@@ -267,6 +280,32 @@ namespace GrandTheftAuto.Dff {
 
             isAlphaMaskString = !isAlphaMaskString;
             mesh.Materials.SetLastValue(material);
+        }
+
+        private void ParseEffect2D() {
+            var count = reader.ReadInt32();
+
+            for(var i = 0; i < count; i++) {
+                var positionX = reader.ReadSingle();
+                var positionZ = reader.ReadSingle();
+                var positionY = reader.ReadSingle();
+                var position = new Vector3(positionX, positionY, positionZ);
+
+                var type = reader.ReadInt32();
+                var size = reader.ReadInt32();
+                var buffer = reader.ReadBytes(size);
+                var newReader = new BufferReader(new System.IO.MemoryStream(buffer));
+
+                switch(type) {
+                    case 7:
+                        effects.Add(new StreetSign(position, newReader));
+                        break;
+
+                    default:
+                        // reader.SkipStream(size);
+                        break;
+                }
+            }
         }
     }
 }

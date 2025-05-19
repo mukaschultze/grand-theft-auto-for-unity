@@ -40,8 +40,11 @@ namespace GrandTheftAuto.Txd {
                 textureCount = short.MaxValue;
                 var reader = file.Reader;
 
-                try { ParseSection(new SectionHeader(reader), reader); }
-                catch(Exception e) { Log.Error("Failed to parse TXD section, on \"\"", e); }
+                try {
+                    ParseSection(new SectionHeader(reader), reader);
+                } catch(Exception e) {
+                    Log.Error("Failed to parse TXD section, on \"\"", e);
+                }
 
                 if(processedTextures != textureCount)
                     Log.Warning("Found {0} textures, expected {1}, on \"{2}\"", processedTextures, textureCount, file.FileName);
@@ -53,6 +56,7 @@ namespace GrandTheftAuto.Txd {
 
             while(reader.Position < end && reader.Position < reader.Length && processedTextures < textureCount) {
                 var header = new SectionHeader(reader);
+                var endsAt = reader.Position + header.Size;
 
                 switch(header.Type) {
                     case SectionType.Struct:
@@ -63,14 +67,16 @@ namespace GrandTheftAuto.Txd {
                                 try {
                                     if(!string.IsNullOrEmpty(texture.Name))
                                         textures.Add(texture.Name, texture);
+                                } catch {
+                                    Log.Error("Failed to add texture {0} to {1}", texture.Name, FileName);
                                 }
-                                catch { Log.Error("Failed to add texture {0} to {1}", texture.Name, FileName); }
 
                                 try {
                                     if(!string.IsNullOrEmpty(texture.AlphaName))
                                         textures.Add(texture.AlphaName, texture);
+                                } catch {
+                                    Log.Error("Failed to add texture alpha {0} to {1}", texture.AlphaName, FileName);
                                 }
-                                catch { Log.Error("Failed to add texture alpha {0} to {1}", texture.AlphaName, FileName); }
 
                                 processedTextures++;
                                 break;
@@ -97,6 +103,14 @@ namespace GrandTheftAuto.Txd {
                         reader.SkipStream(header.Size);
                         Log.Message("Ignored renderwave section {0} in {1}", header.Type, FileNameWithoutExtension);
                         break;
+                }
+
+                if(reader.Position < endsAt) {
+                    Log.Warning("Section \"{0}\" (size {1}) not fully read ({2} bytes left) in \"{3}\"", header.Type, header.Size, endsAt - reader.Position, FileName);
+                    reader.Position = endsAt;
+                } else if(reader.Position > endsAt) {
+                    Log.Warning("Section \"{0}\" (size {1}) overflows ({2} bytes over) in \"{3}\"", header.Type, header.Size, reader.Position - endsAt, FileName);
+                    reader.Position = endsAt;
                 }
 
             }

@@ -10,11 +10,11 @@ namespace GrandTheftAuto.Dff {
         public Matrix4x4 Rotation { get; set; }
         public Geometry Geometry { get; set; }
         public Frame Parent { get; set; }
-        public List<Frame> Childs { get; set; }
+        public List<Frame> Children { get; set; }
 
         public Frame() {
             Name = string.Empty;
-            Childs = new List<Frame>();
+            Children = new List<Frame>();
         }
     }
 }

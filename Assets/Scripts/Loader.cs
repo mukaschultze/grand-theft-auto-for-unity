@@ -125,11 +125,7 @@ namespace GrandTheftAuto {
                 progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
 
                 var definition = IdeCollection[placement.DefinitionID];
-                var obj = definition.GetObject(false);
-
-                obj.transform.position = placement.Position;
-                obj.transform.rotation = placement.Rotation;
-                //obj.transform.localScale = plac.Scale; Unnecessary?
+                    var obj = definition.GetObject(placement.Position, placement.Rotation);
 
                 if(IplCollection.GetLodVersion(placement, out placement))
                     if(!obj.GetComponent<LODGroup>()) {

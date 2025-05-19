@@ -81,6 +81,10 @@
         /// <summary>
         /// Rockstar's custom section. Is a child section of the <see cref="Extension"/> of the <see cref="FrameList"/> inside a <see cref="Dff.DffFile"/>.
         /// </summary>
-        Frame = 0x0253F2FE
+        Frame = 0x0253F2FE,
+        /// <summary>
+        /// 2d Effect, formerly 2dfx, is one of Rockstar's custom sections. In GTA San Andreas it is used to store 2D effects, which were located in ide files in previous versions. There can be multiple effects per section, their types are defined by an ID.
+        /// </summary>
+        Effect2D = 0x0253F2F8,
     }
 }

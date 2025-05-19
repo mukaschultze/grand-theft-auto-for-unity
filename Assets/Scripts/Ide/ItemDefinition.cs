@@ -41,38 +41,45 @@ namespace GrandTheftAuto.Ide {
             RendererModifiers = (renderer, geometry, txdName, definition) => { };
         }
 
-        public GameObject GetObject(bool useLocalPosition) {
+        public GameObject GetObject(Vector3 position, Quaternion rotation) {
             if(loadedObj)
-                using(new Timing("Instantiating Object"))
-                    return Object.Instantiate(loadedObj);
+                using(new Timing("Instantiating Object")) {
+                    var obj = Object.Instantiate(loadedObj);
+                    obj.transform.position = position;
+                    obj.transform.rotation = rotation;
+                    return obj;
+                }
 
-            return loadedObj = CreateObject(useLocalPosition);
+            return loadedObj = CreateObject(position, rotation);
         }
 
-        private GameObject CreateObject(bool useLocalPosition) {
-            DffFile dff;
-            GameObject go = null;
-
+        private GameObject CreateObject(Vector3 position, Quaternion rotation) {
             using(new Timing("Creating Object"))
                 try {
-                    if(!Loader.ModelCollection.TryGetValue(DffName, out dff)) {
+                    if(!Loader.ModelCollection.TryGetValue(DffName, out var dff)) {
                         Log.Error("Dff {0} not found", DffName);
-                        return go = new GameObject("DFF NOT FOUND " + DffName);
+                        return new GameObject("DFF NOT FOUND " + DffName);
                     }
 
-                    go = CreateTransform(dff.RootFrame, null, TxdName, useLocalPosition).gameObject;
+                    var go = CreateTransform(dff.RootFrame, null, TxdName).gameObject;
                     go.AddComponent<ItemDefinitionComponent>().RegisterDefinition(this);
+
+                    go.transform.position = position;
+                    go.transform.rotation = rotation;
+
+                    // Need to this after setting position because street signs use world position instead of local position
+                    foreach(var fx in dff.Effects)
+                        fx.CreateEffectInUnity(go);
 
                     GameObjectModifiers(go, dff, this);
                     return go;
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     Log.Error("Failed to create object {0} (ID {1}): {2}", DffName, ID, e);
-                    return go = new GameObject("ERROR " + DffName);
+                    return new GameObject("ERROR " + DffName);
                 }
         }
 
-        private Transform CreateTransform(Frame frame, Transform parent, string txdName, bool useLocalPosition) {
+        private Transform CreateTransform(Frame frame, Transform parent, string txdName) {
             using(new Timing("Creating Transform")) {
                 if(frame == null) {
                     Log.Warning("Null frame on object \"{0}\"(ID {1})", DffName, ID);
@@ -87,13 +94,11 @@ namespace GrandTheftAuto.Ide {
 
                 transform.SetParent(parent);
 
-                if(useLocalPosition) {
-                    transform.localPosition = frame.Position;
-                    transform.rotation = frame.Rotation.GetQuaternionFromMatrix();
-                }
+                // transform.localPosition = frame.Position;
+                // transform.rotation = frame.Rotation.GetQuaternionFromMatrix();
 
-                foreach(var child in frame.Childs)
-                    CreateTransform(child, transform, txdName, useLocalPosition);
+                foreach(var child in frame.Children)
+                    CreateTransform(child, transform, txdName);
 
                 TransformModifiers(transform, frame, this);
 

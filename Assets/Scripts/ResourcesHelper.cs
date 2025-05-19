@@ -25,6 +25,7 @@ namespace GrandTheftAuto {
         public static readonly Resource<LayerDebugColors> LayerDebugColors = "DebugColors";
         public static readonly Resource<Texture2D> MissingTexture = "Missing";
         public static readonly Resource<GameObject> WaterPrefab = "Water";
+        public static readonly Resource<GameObject> StreetSignPrefab = "StreetSign";
 
         public static readonly Resource<Shader> DiffuseShader = "Shaders/Diffuse";
         public static readonly Resource<Shader> StandardShader = "Shaders/Standard";
