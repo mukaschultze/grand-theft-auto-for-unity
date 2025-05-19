@@ -9,6 +9,7 @@ using GrandTheftAuto.Img;
 using GrandTheftAuto.Ipl;
 using GrandTheftAuto.Shared;
 using GrandTheftAuto.Txd;
+using GrandTheftAuto.Water;
 using UnityEngine;
 
 namespace GrandTheftAuto {
@@ -86,6 +87,8 @@ namespace GrandTheftAuto {
 
                 //ItemDefinition.TransformModifiers += SetStatic;
                 progress.Count = IplCollection.AllPlacements.Count();
+
+                    new WaterFile("data/water.dat", Version).CreateUnityWater();
 
                 foreach(var placement in IplCollection) {
                     Place(placement, progress);
