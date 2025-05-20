@@ -18,6 +18,12 @@ namespace GrandTheftAuto.Txd.Decoding {
             using(new Timing("DXT1 Decoding")) {
                 uint r, g, b;
 
+                // // way faster than calculating DXT1 manually, but doesn't work with mipmaps and its upsidedown
+                // var dxt1Texture = new Texture2D(width, height, TextureFormat.DXT1, UseMipmaps);
+                // dxt1Texture.SetPixelData(reader.ReadBytes((width / 4) * (height / 4) * 8), 0);
+                // dxt1Texture.Apply(UseMipmaps, !Settings.Instance.compressTextures);
+                // return dxt1Texture;
+
                 var texture = GetTexture2D(width, height, rasterFormat);
                 var colors = new Color32[width * height];
 
@@ -27,8 +33,6 @@ namespace GrandTheftAuto.Txd.Decoding {
                 var c2 = (Color32)Color.white;
                 var c3 = (Color32)Color.white;
                 var black = (rasterFormat == RasterFormat.Format_1555) ? new Color32(0, 0, 0, 0) : new Color32(0, 0, 0, 255);
-
-                reader.PrewarmBuffer((width / 4) * (height / 4) * 8);
 
                 for(var y = 0; y < height; y += 4)
                     for(var x = 0; x < width; x += 4) {
@@ -42,6 +46,7 @@ namespace GrandTheftAuto.Txd.Decoding {
                         c0.r = (byte)(r << 3 | r >> 2);
                         c0.g = (byte)(g << 2 | g >> 3);
                         c0.b = (byte)(b << 3 | r >> 2);
+                        c0.a = 255;
 
                         b = (code & 0x1F0000) >> 16; //0000 0000 0001 1111 0000 0000 0000 0000
                         g = (code & 0x7E00000) >> 21; //0000 0111 1110 0000 0000 0000 0000 0000
@@ -50,10 +55,11 @@ namespace GrandTheftAuto.Txd.Decoding {
                         c1.r = (byte)(r << 3 | r >> 2);
                         c1.g = (byte)(g << 2 | g >> 3);
                         c1.b = (byte)(b << 3 | r >> 2);
+                        c1.a = 255;
 
                         if((code & 0xFFFF) > ((code & 0xFFFF0000) >> 16)) {
-                            c2 = SumColor(MultiplyColor(c0, 0.66666666f), MultiplyColor(c1, 0.33333333f));
-                            c3 = SumColor(MultiplyColor(c0, 0.33333333f), MultiplyColor(c1, 0.66666666f));
+                            c2 = SumColor(MultiplyColor(c0, 2f / 3f), MultiplyColor(c1, 1f / 3f));
+                            c3 = SumColor(MultiplyColor(c0, 1f / 3f), MultiplyColor(c1, 2f / 3f));
                         } else {
                             c2 = SumColor(MultiplyColor(c0, 0.5f), MultiplyColor(c1, 0.5f));
                             c3 = black;
