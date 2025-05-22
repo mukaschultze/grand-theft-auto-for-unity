@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using GrandTheftAuto.Data;
 using GrandTheftAuto.Dff;
 using GrandTheftAuto.Diagnostics;
@@ -25,6 +25,19 @@ namespace GrandTheftAuto {
         public static PlacementCollection IplCollection { get; private set; }
         public static TextureCollection TxdCollection { get; private set; }
         public static ModelCollection ModelCollection { get; private set; }
+
+        private readonly HashSet<string> objectsToDisable = new() {
+            // doesn't match original map, now sure what these are
+            "rockovergay",
+            "dirtover",
+            "MALLUNDER", // gta vc mall collision or something like that
+            "mlmallroof01", // duplicated gta vc mall roof
+        };
+
+        private readonly HashSet<string> objectsToEnable = new() {
+            "VegasSland40", // ground on vegas near highway, for some reason it has "shadow" flag
+        };
+
 
         public Loader(GtaVersion version) {
             if(Current != null)
@@ -70,7 +83,7 @@ namespace GrandTheftAuto {
             using(new TempCultureInfo(CultureInfo.InvariantCulture))
             using(new MemoryCounter())
             using(var workingFolder = new TempWorkingFolder(Path))
-            using(var progress = new ProgressBar("Loading " + Version.GetFormatedGTAName() + " map", 0, workingFolder, 32))
+            using(var progress = new ProgressBar("Loading " + Version.GetFormatedGTAName() + " map", 0, workingFolder, 1))
                 try {
                     DefaultData = DataFile.GetMainData(Version);
                     SpecificData = DataFile.GetVersionSpecificData(Version);
@@ -78,7 +91,12 @@ namespace GrandTheftAuto {
                     Gta3img = ImgFile.GetMainImg(Version);
 
                     IdeCollection = new DefinitionCollection() { DefaultData, SpecificData };
-                    IplCollection = new PlacementCollection() { DefaultData, SpecificData, Gta3img };
+
+                    IplCollection = new PlacementCollection();
+                    IplCollection.Add(DefaultData);
+                    IplCollection.Add(SpecificData);
+                    IplCollection.Add(Gta3img);
+
                     TxdCollection = new TextureCollection() { DefaultData, SpecificData, Gta3img };
                     ModelCollection = new ModelCollection() { DefaultData, SpecificData, Gta3img };
 
@@ -88,15 +106,30 @@ namespace GrandTheftAuto {
                     TxdCollection.AddTextureParent(SpecificData);
 
                     ItemDefinition.TransformModifiers += SetStatic;
-                    progress.Count = IplCollection.AllPlacements.Count();
 
                     new WaterFile("data/water.dat", Version).CreateUnityWater();
 
-                    foreach(var placement in IplCollection) {
-                        Place(placement, progress);
+                    var allPlacements = new Dictionary<string, ItemPlacement[]>();
 
-                        if(progress.Canceled)
-                            return;
+                    foreach(var ipl in IplCollection.TextIPLs)
+                        allPlacements.Add(ipl.Key, ipl.Value.Placements);
+
+                    foreach(var ipl in IplCollection.StreamingIPLs)
+                        allPlacements.Add(ipl.Key, ipl.Value.Placements);
+
+                    progress.Count = allPlacements.Count;
+                    progress.Current = 0;
+                    foreach(var ipl in allPlacements) {
+                        progress.Increment(ipl.Key);
+                        var parent = new GameObject(ipl.Key);
+                        foreach(var placement in ipl.Value) {
+                            // progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
+                            if(!IplCollection.IsLOD(placement))
+                                Place(placement, parent);
+
+                            if(progress.Canceled)
+                                return;
+                        }
                     }
 
                     // if(!Camera.main.GetComponent<FreeCamera>())
@@ -122,22 +155,21 @@ namespace GrandTheftAuto {
             transform.gameObject.isStatic = true;
         }
 
-        public GameObject Place(ItemPlacement placement, ProgressBar progress) {
+        public GameObject Place(ItemPlacement placement, GameObject parent = null) {
             using(new Timing("Placing"))
                 try {
-                    progress.Increment(string.Format("(ID {1}) {0}", placement.ItemName, placement.DefinitionID));
-
                     var definition = IdeCollection[placement.DefinitionID];
                     var obj = definition.GetObject(placement.Position, placement.Rotation);
+                    obj.transform.SetParent(parent?.transform, true);
 
                     if(IplCollection.GetLodVersion(placement, out placement))
                         if(!obj.GetComponent<LODGroup>()) {
-                            var lodObj = Place(placement, progress);
                             var lodGroupGO = new GameObject(obj.name + " (LOD Group)");
+                            var lodObj = Place(placement, lodGroupGO);
                             var lodGroup = lodGroupGO.AddComponent<LODGroup>();
 
+                            lodGroupGO.transform.SetParent(parent?.transform, true);
                             obj.transform.SetParent(lodGroupGO.transform);
-                            lodObj.transform.SetParent(lodGroupGO.transform);
                             lodGroupGO.layer = Layer.LODGroup;
 
                             foreach(var child in obj.GetComponentsInChildren<Transform>())
@@ -146,12 +178,18 @@ namespace GrandTheftAuto {
                                 child.gameObject.layer = Layer.LODGroup;
 
                             lodGroup.SetLODs(new LOD[] {
-                                new LOD(0.5f, obj.GetComponentsInChildren<Renderer>()),
-                                new LOD(0f, lodObj.GetComponentsInChildren<Renderer>())
+                                new (0.5f, obj.GetComponentsInChildren<Renderer>()),
+                                new (0f, lodObj.GetComponentsInChildren<Renderer>())
                             });
                             lodGroup.animateCrossFading = true;
                             lodGroup.fadeMode = LODFadeMode.CrossFade;
                         }
+
+                    if(objectsToDisable.Contains(obj.name))
+                        obj.SetActive(false);
+
+                    if(objectsToEnable.Contains(obj.name))
+                        obj.SetActive(true);
 
                     return obj;
                 } catch(Exception e) {

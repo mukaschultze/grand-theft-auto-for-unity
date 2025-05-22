@@ -17,14 +17,14 @@ namespace GrandTheftAuto.Img {
         private Dictionary<string, FileEntry> entries;
         private BufferReader reader;
 
-        public int EntriesCount { get { if(!loaded)LoadEntries(); return entriesCount; } }
+        public int EntriesCount { get { if(!loaded) LoadEntries(); return entriesCount; } }
         public string FilePath { get { return ArchiveFile.FilePath; } }
         public GtaVersion Version { get; private set; }
 
         public FileEntry ArchiveFile { get; private set; }
-        public FileEntry[] Entries { get { if(!loaded)LoadEntries(); return entriesArray; } }
-        public FileEntry this[int index] { get { if(!loaded)LoadEntries(); return entriesArray[index]; } }
-        public FileEntry this[string fileName] { get { if(!loaded)LoadEntries(); return entries[fileName]; } }
+        public FileEntry[] Entries { get { if(!loaded) LoadEntries(); return entriesArray; } }
+        public FileEntry this[int index] { get { if(!loaded) LoadEntries(); return entriesArray[index]; } }
+        public FileEntry this[string fileName] { get { if(!loaded) LoadEntries(); return entries[fileName]; } }
 
         public ImgFile(string path) : this(new FileEntry(path)) { }
 
@@ -39,6 +39,13 @@ namespace GrandTheftAuto.Img {
         public ImgFile(FileEntry file, GtaVersion version) {
             ArchiveFile = file;
             Version = version;
+        }
+
+        public bool Contains(string fileName) {
+            if(!loaded)
+                LoadEntries();
+
+            return entries.ContainsKey(fileName);
         }
 
         private void LoadEntries() {
@@ -72,15 +79,20 @@ namespace GrandTheftAuto.Img {
                 entries = new Dictionary<string, FileEntry>(entriesCount, StringComparer.OrdinalIgnoreCase);
                 reader.PrewarmBuffer(entriesCount * 32);
 
+                Log.Message("Reading {0} entries from \"{1}\"", entriesCount, FilePath);
+
                 for(var i = 0; i < entriesCount; i++) {
                     var pos = reader.ReadInt32() * 2048;
                     var length = reader.ReadInt32() * 2048;
                     var name = reader.ReadBytes(24).GetNullTerminatedString();
 
-                    try {
-                        entries.Add(name, new FileEntry(ArchiveFile, name, pos, length));
-                    }
-                    catch {
+                    if(!entries.ContainsKey(name)) {
+                        try {
+                            entries.Add(name, new FileEntry(ArchiveFile, name, pos, length));
+                        } catch(Exception err) {
+                            Log.Error("Fail to add entry \"{0}\" in \"{1}\": {2}", name, FilePath, err);
+                        }
+                    } else {
                         Log.Error("Duplicated entry name \"{0}\" in \"{1}\"", name, FilePath);
                     }
                 }

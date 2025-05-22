@@ -36,8 +36,19 @@ namespace GrandTheftAuto.Img {
                 Offset = file.Offset + offset;
                 FilePath = file.FilePath;
                 FileName = virtualFileName;
-                reader = file.reader;
-                dependents[reader]++;
+
+                // // uncomment this to not create new streams for each file
+                // reader = file.reader;
+                // dependents[reader]++;
+                // return; 
+
+                var pos = file.reader.Position;
+                file.reader.Position = Offset;
+                var data = file.reader.ReadBytes(Size);
+                file.reader.Position = pos;
+                reader = new BufferReader(new MemoryStream(data));
+                Offset = 0;
+                dependents[reader] = 1;
             }
         }
 
@@ -48,9 +59,10 @@ namespace GrandTheftAuto.Img {
             try {
                 dependents.Remove(reader);
                 reader.Dispose();
-                Log.Message("Closed stream for file: {0}", FilePath);
+                // Log.Message("Closed stream for file: {0}", FilePath);
+            } catch {
+                Log.Error("Failed to close stream for file: {0}", FilePath);
             }
-            catch { Log.Error("Failed to close stream for file: {0}", FilePath); }
         }
 
         public byte[] GetData() {

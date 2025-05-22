@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,16 +8,18 @@ using GrandTheftAuto.Img;
 using UnityEngine;
 
 namespace GrandTheftAuto.Ipl {
-    public class PlacementCollection : IEnumerable<ItemPlacement> {
+    public class PlacementCollection {
 
         private const string STREAMING_IPL_NAME_FORMAT = "{0}_stream{1}.ipl";
 
         private readonly Dictionary<string, IplFile> textIPLs = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<ItemPlacement> allPlacements = new();
+        private readonly Dictionary<string, BinaryIpl> streamingIPLs = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<ItemPlacement, ItemPlacement> lodLinks = new();
         private readonly HashSet<ItemPlacement> lodPlacements = new();
 
-        public ItemPlacement[] AllPlacements { get { return allPlacements.ToArray(); } }
+        // public ItemPlacement[] AllPlacements { get { return allPlacements.Values.ToArray(); } }
+        public Dictionary<string, IplFile> TextIPLs { get { return textIPLs.ToDictionary(kvp => kvp.Key, kvp => kvp.Value); } }
+        public Dictionary<string, BinaryIpl> StreamingIPLs { get { return streamingIPLs.ToDictionary(kvp => kvp.Key, kvp => kvp.Value); } }
 
         public void Add(DataFile data) {
             using(new Timing("Adding Placements (data)"))
@@ -29,7 +30,6 @@ namespace GrandTheftAuto.Ipl {
         public void Add(IplFile ipl) {
             using(new Timing("Adding Placements (ipl)")) {
                 textIPLs.Add(Path.GetFileNameWithoutExtension(ipl.FilePath), ipl);
-                allPlacements.AddRange(ipl);
             }
         }
 
@@ -39,20 +39,23 @@ namespace GrandTheftAuto.Ipl {
                 return;
             }
 
-            // clear LOD loaded from other IPLs
-            allPlacements.Clear();
-
             using(new Timing("Adding Placements (streaming)"))
                 foreach(var kvp in textIPLs) {
                     var textIplName = kvp.Key;
-                    var placements = new List<ItemPlacement>(kvp.Value);
+                    var placements = new List<ItemPlacement>(kvp.Value.Placements);
 
                     try {
                         for(var i = 0; ;) {
                             var binaryIplName = string.Format(STREAMING_IPL_NAME_FORMAT, textIplName, i++);
-                            placements.AddRange(new BinaryIpl(img[binaryIplName]));
+
+                            if(!img.Contains(binaryIplName))
+                                break;
+
+                            var binaryIpl = new BinaryIpl(img[binaryIplName]);
+                            streamingIPLs.Add(binaryIplName, binaryIpl);
+                            placements.AddRange(binaryIpl.Placements);
                         }
-                    } catch(KeyNotFoundException) { } catch(Exception e) { Log.Exception(e); }
+                    } catch(Exception e) { Log.Exception(e); }
 
                     using(new Timing("Resolving LODs"))
                         for(var i = 0; i < placements.Count; i++) {
@@ -68,7 +71,7 @@ namespace GrandTheftAuto.Ipl {
                             } catch(Exception e) { Log.Error("Failed to resolve LOD link, object {0}({1}) with lod {2}: {3}", placement.ItemName, placement.DefinitionID, placement.LodDefinitionID, e); }
                         }
 
-                    allPlacements.AddRange(placements);
+                    // allPlacements.AddRange(placements);
                 }
         }
 
@@ -77,11 +80,12 @@ namespace GrandTheftAuto.Ipl {
                 return;
 
             using(new Timing("Resolving LODs (Named)")) {
-                var lods = allPlacements.Where(placement => placement.ItemName.StartsWith("LOD"));
+                var placements = textIPLs.Values.SelectMany(ipl => ipl.Placements);
+                var lods = placements.Where(placement => placement.ItemName.StartsWith("LOD"));
 
                 foreach(var lod in lods) {
                     try {
-                        var nearest = allPlacements.First(placement => Vector3.SqrMagnitude(placement.Position - lod.Position) < 0.01 && placement.ItemName.Substring(3) == lod.ItemName.Substring(3));
+                        var nearest = placements.First(placement => Vector3.SqrMagnitude(placement.Position - lod.Position) < 0.01 && placement.ItemName.Substring(3) == lod.ItemName.Substring(3));
                         lodLinks.Add(nearest, lod);
                         lodPlacements.Add(lod);
                     } catch(Exception e) {
@@ -91,26 +95,12 @@ namespace GrandTheftAuto.Ipl {
             }
         }
 
+        public bool IsLOD(ItemPlacement placement) {
+            return lodPlacements.Contains(placement);
+        }
+
         public bool GetLodVersion(ItemPlacement highResVersion, out ItemPlacement lowResVersion) {
             return lodLinks.TryGetValue(highResVersion, out lowResVersion);
-        }
-
-        public IEnumerator<ItemPlacement> GetEnumerator() {
-            var nonLodPlacements = (from plac in allPlacements
-                                    where !lodPlacements.Contains(plac)
-                                    orderby plac.DefinitionID
-                                    select plac).ToArray();
-
-            return ((IEnumerable<ItemPlacement>)nonLodPlacements).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() {
-            var nonLodPlacements = (from plac in allPlacements
-                                    where !lodPlacements.Contains(plac)
-                                    orderby plac.DefinitionID
-                                    select plac).ToArray();
-
-            return ((IEnumerable<ItemPlacement>)nonLodPlacements).GetEnumerator();
         }
     }
 }

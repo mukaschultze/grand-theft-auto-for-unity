@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using GrandTheftAuto.Diagnostics;
 using UnityEngine;
 
 namespace GrandTheftAuto.Ipl {
     //TODO: Read other sections, if necessary
-    public sealed class IplFile : TextFileParser, IEnumerable<ItemPlacement> {
+    public sealed class IplFile : TextFileParser {
         //TODO: Implement GTA SA IPL sections
         //http://gtaforums.com/topic/202532-sadoc-ipl-definitions/
         private enum IPLSection {
@@ -25,24 +24,25 @@ namespace GrandTheftAuto.Ipl {
         protected override char EofChar { get { return '#'; } }
 
         private IPLSection currentSection = IPLSection.End;
-        private List<ItemPlacement> placements = new List<ItemPlacement>();
-        private readonly static Dictionary<GtaVersion, int> requiredTokens = new Dictionary<GtaVersion, int> {
+        private readonly List<ItemPlacement> placements = new();
+        private readonly static Dictionary<GtaVersion, int> requiredTokens = new() {
             { GtaVersion.III, 12 },
             { GtaVersion.ViceCity, 13 },
             { GtaVersion.SanAndreas, 11 }
         };
+
+        public ItemPlacement[] Placements { get; private set; }
 
         public IplFile(string path, GtaVersion version) {
             using(new Timing("Loading IPL")) {
                 FilePath = path;
                 Version = version;
                 Load();
+                Placements = placements.ToArray();
             }
         }
 
         protected override void ParseLine(string line) {
-            ItemPlacement obj;
-
             switch(currentSection) {
                 case IPLSection.End:
                     ProcessNewSectionStart(line);
@@ -51,7 +51,7 @@ namespace GrandTheftAuto.Ipl {
                 default:
                     if(line.Equals("end", StringComparison.Ordinal))
                         currentSection = IPLSection.End;
-                    else if(ProcessSectionItem(line, out obj))
+                    else if(ProcessSectionItem(line, out var obj))
                         placements.Add(obj);
                     break;
             }
@@ -119,14 +119,6 @@ namespace GrandTheftAuto.Ipl {
                 Log.Error("Failed to parse IPL line at \"{0}\", line \"{1}\", section {2}: {3}", FilePath, line, currentSection, e);
                 return false;
             }
-        }
-
-        public IEnumerator<ItemPlacement> GetEnumerator() {
-            return ((IEnumerable<ItemPlacement>)placements).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable<ItemPlacement>)placements).GetEnumerator();
         }
     }
 }

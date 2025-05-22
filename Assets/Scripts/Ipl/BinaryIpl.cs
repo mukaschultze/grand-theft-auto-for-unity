@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using GrandTheftAuto.Diagnostics;
 using GrandTheftAuto.Img;
 using UnityEngine;
 
 namespace GrandTheftAuto.Ipl {
-    public class BinaryIpl : IEnumerable<ItemPlacement> {
+    public class BinaryIpl {
         private const int BNRY = 2037542498;
 
-        private ItemPlacement[] placements;
+        private readonly ItemPlacement[] placements;
+
+        public ItemPlacement[] Placements { get { return placements; } }
 
         public ItemPlacement this[int index] { get { return placements[index]; } }
 
@@ -54,14 +54,6 @@ namespace GrandTheftAuto.Ipl {
                     placements[i] = placement;
                 }
             }
-        }
-
-        public IEnumerator<ItemPlacement> GetEnumerator() {
-            return ((IEnumerable<ItemPlacement>)placements).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() {
-            return ((IEnumerable<ItemPlacement>)placements).GetEnumerator();
         }
     }
 }
