@@ -3,7 +3,7 @@
 --- !u!30 &1
 GraphicsSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 16
   m_Deferred:
     m_Mode: 1
     m_Shader: {fileID: 69, guid: 0000000000000000f000000000000000, type: 0}
@@ -13,9 +13,6 @@ GraphicsSettings:
   m_ScreenSpaceShadows:
     m_Mode: 1
     m_Shader: {fileID: 64, guid: 0000000000000000f000000000000000, type: 0}
-  m_LegacyDeferred:
-    m_Mode: 1
-    m_Shader: {fileID: 63, guid: 0000000000000000f000000000000000, type: 0}
   m_DepthNormals:
     m_Mode: 1
     m_Shader: {fileID: 62, guid: 0000000000000000f000000000000000, type: 0}
@@ -28,8 +25,22 @@ GraphicsSettings:
   m_LensFlare:
     m_Mode: 1
     m_Shader: {fileID: 102, guid: 0000000000000000f000000000000000, type: 0}
-  m_AlwaysIncludedShaders: []
+  m_VideoShadersIncludeMode: 2
+  m_AlwaysIncludedShaders:
+  - {fileID: 4800000, guid: 68f9938c7bf52e94bb37d6a74297f0ae, type: 3}
+  - {fileID: 4800000, guid: ce4cea5500fd1664ab8ec906187a8f6e, type: 3}
+  - {fileID: 4800000, guid: 9f3f6f752b5025443bac6d8a81d38478, type: 3}
+  - {fileID: 4800000, guid: 91ab9eda50e124647a3851a996917df9, type: 3}
+  - {fileID: 4800000, guid: 764c4b3c00d8a31489a5b825dbfa1553, type: 3}
+  - {fileID: 4800000, guid: ed6c30a513efa1e49af4a791bd4675b7, type: 3}
+  - {fileID: 4800000, guid: 8975e132e9972254ebd4aae17e269a03, type: 3}
+  - {fileID: 4800000, guid: dbfcdac9417695f4e9cc55c4e4cb03d8, type: 3}
+  - {fileID: 4800000, guid: 96bf9c041775a76498ddf9cc97c0251e, type: 3}
+  - {fileID: 4800000, guid: 537ee96eb0f0e5348bead799d732fa65, type: 3}
+  - {fileID: 4800000, guid: 721d4727a93c1e548a5c6160a6229427, type: 3}
+  - {fileID: 4800000, guid: ca3c44b6d4f2d4d1095e1e783d9684ba, type: 3}
   m_PreloadedShaders: []
+  m_PreloadShadersBatchTimeLimit: -1
   m_SpritesDefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000,
     type: 0}
   m_CustomRenderPipeline: {fileID: 0}
@@ -38,7 +49,7 @@ GraphicsSettings:
   m_DefaultRenderingPath: 1
   m_DefaultMobileRenderingPath: 1
   m_TierSettings:
-  - serializedVersion: 4
+  - serializedVersion: 5
     m_BuildTarget: 1
     m_Tier: 0
     m_Settings:
@@ -51,9 +62,11 @@ GraphicsSettings:
       useHDR: 1
       useDetailNormalMap: 1
       useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 0
       useDitherMaskForAlphaBlendedShadows: 1
     m_Automatic: 0
-  - serializedVersion: 4
+  - serializedVersion: 5
     m_BuildTarget: 1
     m_Tier: 1
     m_Settings:
@@ -66,9 +79,11 @@ GraphicsSettings:
       useHDR: 1
       useDetailNormalMap: 1
       useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 0
       useDitherMaskForAlphaBlendedShadows: 1
     m_Automatic: 0
-  - serializedVersion: 4
+  - serializedVersion: 5
     m_BuildTarget: 1
     m_Tier: 2
     m_Settings:
@@ -81,11 +96,14 @@ GraphicsSettings:
       useHDR: 1
       useDetailNormalMap: 1
       useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 0
       useDitherMaskForAlphaBlendedShadows: 1
     m_Automatic: 0
   m_LightmapStripping: 0
   m_FogStripping: 0
   m_InstancingStripping: 0
+  m_BrgStripping: 0
   m_LightmapKeepPlain: 1
   m_LightmapKeepDirCombined: 1
   m_LightmapKeepDynamicPlain: 1
@@ -96,5 +114,10 @@ GraphicsSettings:
   m_FogKeepExp: 1
   m_FogKeepExp2: 1
   m_AlbedoSwatchInfos: []
+  m_RenderPipelineGlobalSettingsMap: {}
   m_LightsUseLinearIntensity: 1
   m_LightsUseColorTemperature: 1
+  m_LogWhenShaderIsCompiled: 0
+  m_LightProbeOutsideHullStrategy: 0
+  m_CameraRelativeLightCulling: 0
+  m_CameraRelativeShadowCulling: 0

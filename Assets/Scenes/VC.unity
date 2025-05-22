@@ -219,6 +219,7 @@ GameObject:
   - component: {fileID: 186538334}
   - component: {fileID: 186538337}
   - component: {fileID: 186538338}
+  - component: {fileID: 186538339}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -382,34 +383,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10a43f35b5af20449b322c3dae3a338, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boost: 10
-  positionLerpTime: 0.2
-  mouseSensitivityCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.5
-      inSlope: 0
-      outSlope: 5
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 2.5
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotationLerpTime: 0.01
-  invertY: 0
 --- !u!114 &186538338
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -427,6 +400,61 @@ MonoBehaviour:
   lookSpeed: 5
   moveSpeed: 50
   sprintSpeed: 500
+--- !u!114 &186538339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186538329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b9e31fdf962e3e4ca3b62ec3ecc2f4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Tonemapper: 0
+  Exposure: 1
+  LinearWhitePoint: 11.2
+  ApplyDithering: 0
+  QualityLevel: 1
+  BlendAmount: 0
+  LutTexture: {fileID: 2800000, guid: 2d6a9c80173276b4a83cd556305ca09b, type: 3}
+  LutBlendTexture: {fileID: 0}
+  MaskTexture: {fileID: 0}
+  UseDepthMask: 0
+  DepthMaskCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  UseVolumes: 0
+  ExitVolumeBlendTime: 1
+  TriggerVolumeProxy: {fileID: 0}
+  VolumeCollisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  EffectFlags:
+    components: []
+  sharedInstanceID: e3a2f5c1-6650-4345-bb97-59a3a66ccf0d
 --- !u!1 &1801274396
 GameObject:
   m_ObjectHideFlags: 0

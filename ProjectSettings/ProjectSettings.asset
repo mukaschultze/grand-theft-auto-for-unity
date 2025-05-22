@@ -328,7 +328,7 @@ PlayerSettings:
   - m_BuildTarget: Switch
     m_GraphicsJobs: 1
   - m_BuildTarget: WebGLSupport
-    m_GraphicsJobs: 0
+    m_GraphicsJobs: 1
   - m_BuildTarget: MetroSupport
     m_GraphicsJobs: 1
   - m_BuildTarget: AppleTVSupport
